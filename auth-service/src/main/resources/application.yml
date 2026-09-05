@@ -1,0 +1,43 @@
+spring:
+  application:
+    name: auth-service
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/auth_db}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+  flyway:
+    enabled: true
+    
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.StringSerializer
+
+      properties:
+        spring.json.add.type.headers: false
+
+server:
+  port: ${SERVER_PORT:8081}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        # include: health,info,metrics,prometheus
+        include: "*"
+
+jwt:
+  secret: ${JWT_SECRET:change-this-secret-key-to-a-long-random-value}
+  expiration-ms: ${JWT_EXPIRATION_MS:900000}
+
+refresh-token:
+  expiration-ms: ${REFRESH_TOKEN_EXPIRATION_MS:2592000000}

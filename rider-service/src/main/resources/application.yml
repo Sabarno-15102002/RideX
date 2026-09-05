@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: rider-service
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/rider_db}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+  flyway:
+    enabled: true
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+
+    consumer:
+      group-id: rider-service
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+
+      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      
+      properties:
+        spring.json.trusted.packages: "com.ridex.rider.event"
+        spring.json.value.default.type: "com.ridex.rider.event.UserRegisteredEvent"
+
+server:
+  port: ${SERVER_PORT:8082}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+jwt:
+  secret: ${JWT_SECRET:change-this-secret-key-to-a-long-random-value}
+  expiration-ms: ${JWT_EXPIRATION_MS:900000}

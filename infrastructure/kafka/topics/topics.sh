@@ -1,0 +1,26 @@
+#!/bin/bash
+
+set -e
+
+KAFKA_CONTAINER="${KAFKA_CONTAINER:-ridex-kafka}"
+
+create_topic() {
+    local topic=$1
+    local partitions=$2
+
+    docker exec "$KAFKA_CONTAINER" \
+        /opt/kafka/bin/kafka-topics.sh \
+        --create \
+        --if-not-exists \
+        --topic "$topic" \
+        --bootstrap-server localhost:9092 \
+        --partitions "$partitions" \
+        --replication-factor 1
+
+    echo "Created/verified topic: $topic"
+}
+
+create_topic "user.registered" 3
+create_topic "user.registered.DLT" 3
+
+echo "Kafka topic setup completed."
