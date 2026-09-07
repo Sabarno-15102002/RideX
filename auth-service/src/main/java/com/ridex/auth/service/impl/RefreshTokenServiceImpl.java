@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ridex.auth.entity.RefreshToken;
 import com.ridex.auth.entity.User;
@@ -15,7 +16,6 @@ import com.ridex.auth.service.util.GeneratedRefreshToken;
 import com.ridex.auth.service.util.RefreshTokenGenerator;
 import com.ridex.auth.service.util.TokenHashUtil;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -84,10 +84,6 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
                 int updatedRows = refreshTokenRepository.revokeIfActive(
                                 currentToken.getId());
 
-                /*
-                 * If another request already revoked it,
-                 * this request loses the race.
-                 */
                 if (updatedRows != 1) {
 
                         refreshTokenRepository.revokeFamily(
@@ -124,20 +120,6 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
                                 newToken);
         }
 
-        // /**
-        //  * If an already-rotated token is reused,
-        //  * revoke the entire token family.
-        //  */
-        // private void handleTokenReuse(
-        //                 RefreshToken compromisedToken) {
-
-        //         refreshTokenRepository.revokeFamily(
-        //                         compromisedToken.getFamilyId());
-        // }
-
-        /**
-         * Revokes a single refresh token.
-         */
         @Override
         @Transactional
         public void revoke(String rawRefreshToken) {
@@ -153,10 +135,6 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
                                 token.getId());
         }
 
-        /**
-         * Revokes every active refresh token belonging
-         * to the user.
-         */
         @Override
         @Transactional
         public void revokeAll(UUID userId) {

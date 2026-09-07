@@ -12,15 +12,8 @@ public interface RefreshTokenService {
 
     GeneratedRefreshToken rotate(RefreshToken currentToken, User user);
 
-    /**
-     * Revokes a single refresh token.
-     */
     void revoke(String rawRefreshToken);
 
-    /**
-     * Revokes every active refresh token belonging
-     * to the user.
-     */
     void revokeAll(UUID userId);
     
 }

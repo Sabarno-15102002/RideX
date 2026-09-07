@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ridex.auth.config.JwtProvider;
 import com.ridex.auth.dto.request.LoginRequest;
@@ -26,8 +27,6 @@ import com.ridex.auth.service.util.OutboxEventService;
 import com.ridex.auth.service.util.TokenHashUtil;
 import com.ridex.auth.utilities.UserRole;
 import com.ridex.auth.utilities.UserStatus;
-
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -66,7 +65,7 @@ public class AuthServiceImpl implements AuthService {
                                 .passwordHash(
                                                 passwordEncoder.encode(
                                                                 request.password()))
-                                .role(UserRole.RIDER)
+                                .role(request.role() != null ? request.role() : UserRole.RIDER)
                                 .status(UserStatus.ACTIVE)
                                 .createdAt(Instant.now())
                                 .updatedAt(Instant.now())
