@@ -1,5 +1,6 @@
 package com.ridex.driver.service.Impl;
 
+import java.time.Instant;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -9,9 +10,11 @@ import com.ridex.driver.dto.response.DriverResponse;
 import com.ridex.driver.dto.response.VehicleResponse;
 import com.ridex.driver.entity.Driver;
 import com.ridex.driver.entity.Vehicle;
+import com.ridex.driver.event.DriverStatusChangedEvent;
 import com.ridex.driver.repository.DriverRepository;
 import com.ridex.driver.repository.VehicleRepository;
 import com.ridex.driver.service.DriverService;
+import com.ridex.driver.service.utilities.OutboxEventService;
 import com.ridex.driver.utilities.DriverStatus;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -23,6 +26,8 @@ public class DriverServiceImpl implements DriverService {
 
         private final DriverRepository driverRepository;
         private final VehicleRepository vehicleRepository;
+
+        private final OutboxEventService outboxEventService;
 
         @Override
         public DriverResponse getDriver(UUID userId) {
@@ -61,6 +66,14 @@ public class DriverServiceImpl implements DriverService {
                 }
 
                 driver.setStatus(requestedStatus);
+                DriverStatusChangedEvent event = new DriverStatusChangedEvent(
+                                UUID.randomUUID(),
+                                driver.getId(),
+                                driver.getUserId(),
+                                driver.getStatus().name(),
+                                Instant.now());
+
+                outboxEventService.saveDriverStatusChangedEvent(event);
 
                 return new DriverResponse(
                                 driver.getId(),
@@ -88,7 +101,7 @@ public class DriverServiceImpl implements DriverService {
                 };
         }
 
-        @Override 
+        @Override
         public VehicleResponse getVehicle(UUID driverId) {
 
                 // First verify that the driver exists
