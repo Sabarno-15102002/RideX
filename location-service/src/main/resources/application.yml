@@ -1,0 +1,47 @@
+spring:
+  application:
+    name: location-service
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+
+    consumer:
+      group-id: location-service
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+
+      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+
+      properties:
+        spring.json.trusted.packages: "com.ridex.location.event"
+        spring.json.value.default.type: "com.ridex.location.event.DriverStatusChangedEvent"
+
+server:
+  port: ${SERVER_PORT:8084}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+jwt:
+  secret: ${JWT_SECRET:change-this-secret-key-to-a-long-random-value}
+  expiration-ms: ${JWT_EXPIRATION_MS:900000}
+
+ridex:
+  location:
+    stale-after-seconds: 30
+    cleanup-interval-ms: 10000
+
+logging:
+  level:
+    org.springframework.web.socket: DEBUG
+    org.springframework.messaging: DEBUG
+    org.springframework.messaging.simp: DEBUG
