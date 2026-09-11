@@ -22,5 +22,7 @@ create_topic() {
 
 create_topic "user.registered" 3
 create_topic "user.registered.DLT" 3
+create_topic "driver.status.changed" 3
+create_topic "driver.status.changed.DLT" 3
 
 echo "Kafka topic setup completed."
