@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ridex.location.config.SecurityUtils;
 import com.ridex.location.dto.request.UpdateLocationRequest;
 import com.ridex.location.dto.response.NearbyDriverResponse;
 import com.ridex.location.service.DriverLocationService;
@@ -29,9 +30,8 @@ public class DriverLocationController {
 
         @PutMapping("/me/location")
         public ResponseEntity<Void> updateMyLocation(
-                        @AuthenticationPrincipal Jwt jwt,
                         @Valid @RequestBody UpdateLocationRequest request) {
-                UUID userId = UUID.fromString(jwt.getSubject());
+                UUID userId = SecurityUtils.getCurrentUserId();
 
                 driverLocationService.updateDriverLocation(
                                 userId,

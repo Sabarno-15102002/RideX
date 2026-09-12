@@ -1,14 +1,19 @@
 package com.ridex.rider.service.Impl;
 
+import java.time.Instant;
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ridex.rider.entity.ProcessedEvent;
 import com.ridex.rider.entity.Rider;
+import com.ridex.rider.event.RiderCreatedEvent;
 import com.ridex.rider.event.UserRegisteredEvent;
 import com.ridex.rider.repository.ProcessedEventRepository;
 import com.ridex.rider.repository.RiderRepository;
 import com.ridex.rider.service.RiderRegistrationService;
+import com.ridex.rider.service.util.OutboxEventService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,6 +23,7 @@ public class RiderRegistrationServiceImpl implements RiderRegistrationService {
 
     private final RiderRepository riderRepository;
     private final ProcessedEventRepository processedEventRepository;
+    private final OutboxEventService outboxEventService;
 
     @Override
     @Transactional
@@ -60,5 +66,14 @@ public class RiderRegistrationServiceImpl implements RiderRegistrationService {
                         .eventId(event.eventId())
                         .build()
         );
+
+        RiderCreatedEvent riderCreatedEvent = new RiderCreatedEvent(
+                UUID.randomUUID(),
+                rider.getId(),
+                rider.getUserId(),
+                Instant.now()
+        );
+
+        outboxEventService.saveRiderCreatedEvent(riderCreatedEvent);
     }
 }

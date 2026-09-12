@@ -24,5 +24,9 @@ create_topic "user.registered" 3
 create_topic "user.registered.DLT" 3
 create_topic "driver.status.changed" 3
 create_topic "driver.status.changed.DLT" 3
+create_topic "rider.created" 3
+create_topic "rider.created.DLT" 3
+create_topic "trip.requested" 3
+create_topic "trip.requested.DLT" 3
 
 echo "Kafka topic setup completed."

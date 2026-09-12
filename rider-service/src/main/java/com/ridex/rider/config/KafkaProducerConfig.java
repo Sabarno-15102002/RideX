@@ -19,8 +19,46 @@ public class KafkaProducerConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
 
+    // =========================================================
+    // Outbox producer: String key -> String JSON payload
+    // =========================================================
+
     @Bean
-    public ProducerFactory<String, Object> producerFactory() {
+    public ProducerFactory<String, String> outboxProducerFactory() {
+
+        Map<String, Object> config = new HashMap<>();
+
+        config.put(
+                ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
+                bootstrapServers
+        );
+
+        config.put(
+                ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
+                StringSerializer.class
+        );
+
+        config.put(
+                ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
+                StringSerializer.class
+        );
+
+        return new DefaultKafkaProducerFactory<>(config);
+    }
+
+    @Bean
+    public KafkaTemplate<String, String> outboxKafkaTemplate(
+            ProducerFactory<String, String> outboxProducerFactory
+    ) {
+        return new KafkaTemplate<>(outboxProducerFactory);
+    }
+
+    // =========================================================
+    // DLT producer: String key -> Java object
+    // =========================================================
+
+    @Bean
+    public ProducerFactory<String, Object> dltProducerFactory() {
 
         Map<String, Object> config = new HashMap<>();
 
@@ -43,10 +81,9 @@ public class KafkaProducerConfig {
     }
 
     @Bean
-    public KafkaTemplate<String, Object> kafkaTemplate(
-            ProducerFactory<String, Object> producerFactory
+    public KafkaTemplate<String, Object> dltKafkaTemplate(
+            ProducerFactory<String, Object> dltProducerFactory
     ) {
-
-        return new KafkaTemplate<>(producerFactory);
+        return new KafkaTemplate<>(dltProducerFactory);
     }
 }

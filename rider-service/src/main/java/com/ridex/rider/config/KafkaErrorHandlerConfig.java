@@ -1,6 +1,7 @@
 package com.ridex.rider.config;
 
 import org.apache.kafka.common.TopicPartition;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -13,7 +14,8 @@ public class KafkaErrorHandlerConfig {
 
     @Bean
     public DeadLetterPublishingRecoverer deadLetterPublishingRecoverer(
-            KafkaTemplate<String, Object> kafkaTemplate
+        @Qualifier("dltKafkaTemplate")
+        KafkaTemplate<String, Object> kafkaTemplate
     ) {
 
         return new DeadLetterPublishingRecoverer(
