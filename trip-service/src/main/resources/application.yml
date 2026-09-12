@@ -1,0 +1,35 @@
+spring:
+    application:
+        name: trip-service
+
+    datasource:
+        url: ${DB_URL:jdbc:postgresql://localhost:5432/trip_db}
+        username: ${DB_USERNAME:postgres}
+        password: ${DB_PASSWORD:postgres}
+
+    jpa:
+        hibernate:
+            ddl-auto: validate
+        open-in-view: false
+
+    flyway:
+        enabled: true
+
+    kafka:
+        bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+
+        consumer:
+        group-id: trip-service
+        auto-offset-reset: earliest
+        enable-auto-commit: false
+
+        key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+        value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+
+        properties:
+            spring.json.trusted.packages: "com.ridex.trip.event"
+            spring.json.value.default.type: "com.ridex.trip.event.RiderCreatedEvent"
+
+
+server:
+  port: ${TRIP_SERVICE_PORT:8085}
