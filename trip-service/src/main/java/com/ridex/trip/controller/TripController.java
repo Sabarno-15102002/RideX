@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ridex.trip.config.SecurityUtils;
 import com.ridex.trip.dto.request.CreateTripRequest;
 import com.ridex.trip.dto.response.TripResponse;
-import com.ridex.trip.service.Impl.TripService;
+import com.ridex.trip.service.TripService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

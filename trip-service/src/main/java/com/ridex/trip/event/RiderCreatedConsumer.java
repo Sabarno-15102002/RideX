@@ -18,7 +18,7 @@ public class RiderCreatedConsumer {
     @KafkaListener(
             topics = "rider.created",
             groupId = "trip-service",
-            containerFactory = "kafkaListenerContainerFactory"
+            containerFactory = "riderCreatedKafkaListenerContainerFactory"
     )
     public void consume(RiderCreatedEvent event) {
 

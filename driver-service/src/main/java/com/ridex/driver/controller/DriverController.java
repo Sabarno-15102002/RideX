@@ -18,7 +18,6 @@ import com.ridex.driver.dto.response.DriverResponse;
 import com.ridex.driver.dto.response.VehicleResponse;
 import com.ridex.driver.service.DriverOnboardingService;
 import com.ridex.driver.service.DriverService;
-
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 

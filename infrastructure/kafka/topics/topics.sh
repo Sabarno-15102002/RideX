@@ -28,5 +28,7 @@ create_topic "rider.created" 3
 create_topic "rider.created.DLT" 3
 create_topic "trip.requested" 3
 create_topic "trip.requested.DLT" 3
+create_topic "driver.match.requested" 3
+create_topic "driver.match.requested.DLT" 3
 
 echo "Kafka topic setup completed."
