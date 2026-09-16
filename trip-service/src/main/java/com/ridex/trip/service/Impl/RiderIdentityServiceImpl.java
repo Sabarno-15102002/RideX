@@ -5,7 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ridex.trip.entity.ProcessedEvent;
 import com.ridex.trip.entity.RiderIdentity;
-import com.ridex.trip.event.RiderCreatedEvent;
+import com.ridex.trip.event.event.RiderCreatedEvent;
 import com.ridex.trip.repository.ProcessedEventRepository;
 import com.ridex.trip.repository.RiderIdentityRepository;
 import com.ridex.trip.service.RiderIdentityService;

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ridex.driver.dto.request.ReserveDriverRequest;
 import com.ridex.driver.dto.response.DriverReservationResponse;
-import com.ridex.driver.service.Impl.DriverReservationService;
+import com.ridex.driver.service.DriverReservationService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,22 +21,35 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DriverReservationController {
 
-    private final DriverReservationService reservationService;
+        private final DriverReservationService reservationService;
 
-    @PostMapping("/{driverId}/reservations")
-    public ResponseEntity<DriverReservationResponse> reserveDriver(
-            @PathVariable UUID driverId,
-            @Valid @RequestBody ReserveDriverRequest request
-    ) {
+        @PostMapping("/{driverId}/reservations")
+        public ResponseEntity<DriverReservationResponse> reserveDriver(
+                        @PathVariable UUID driverId,
+                        @Valid @RequestBody ReserveDriverRequest request) {
 
-        boolean reserved =
-                reservationService.reserveDriver(
-                        driverId,
-                        request.tripId()
-                );
+                boolean reserved = reservationService.reserveDriver(
+                                driverId,
+                                request.tripId());
 
-        return ResponseEntity.ok(
-                new DriverReservationResponse(reserved)
-        );
-    }
+                return ResponseEntity.ok(
+                                new DriverReservationResponse(reserved));
+        }
+
+        @PostMapping("/{driverId}/reservations/{tripId}/accept")
+        public ResponseEntity<Void> acceptReservation(
+                        @PathVariable UUID driverId,
+                        @PathVariable UUID tripId) {
+                reservationService.acceptReservation(driverId, tripId);
+                return ResponseEntity.noContent().build();
+        }
+
+        @PostMapping("/{driverId}/reservations/{tripId}/release")
+        public ResponseEntity<Void> releaseReservation(
+                @PathVariable UUID driverId,
+                @PathVariable UUID tripId
+        ) {
+                reservationService.releaseReservation(driverId, tripId);
+                return ResponseEntity.noContent().build();
+        }
 }

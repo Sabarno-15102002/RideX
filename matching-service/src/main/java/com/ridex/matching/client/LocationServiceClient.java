@@ -31,7 +31,7 @@ public class LocationServiceClient {
         List<NearbyDriverResponse> response =
                 restClient.get()
                         .uri(uriBuilder -> uriBuilder
-                                .path("/api/v1/drivers/nearby")
+                                .path("/api/v1/internal/drivers/nearby")
                                 .queryParam("latitude", latitude)
                                 .queryParam("longitude", longitude)
                                 .queryParam("radiusKm", radiusKm)

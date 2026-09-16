@@ -18,7 +18,7 @@ public class TripRequestedConsumer {
     @KafkaListener(
             topics = "trip.requested",
             groupId = "matching-service",
-            containerFactory = "kafkaListenerContainerFactory"
+            containerFactory = "tripRequestedKafkaListenerContainerFactory"
     )
     public void consume(TripRequestedEvent event) {
 

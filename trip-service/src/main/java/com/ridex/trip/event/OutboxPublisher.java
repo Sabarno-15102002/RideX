@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 public class OutboxPublisher {
 
     private static final String TRIP_REQUESTED_TOPIC = "trip.requested";
+    private static final String TRIP_REMATCHING_TOPIC = "trip.rematching";
 
     private final OutboxEventRepository outboxEventRepository;
 
@@ -47,10 +48,26 @@ public class OutboxPublisher {
 
     private void publish(OutboxEvent event) {
 
+        String topic;
+        String eventType = event.getEventType();
+        switch (eventType) {
+            case "TRIP_REQUESTED":
+                topic = TRIP_REQUESTED_TOPIC;
+                break;
+
+            case "TRIP_REMATCHING":
+                topic = TRIP_REMATCHING_TOPIC;
+                break;
+        
+            default:
+                topic = TRIP_REQUESTED_TOPIC;
+                break;
+        }
+
         try {
             kafkaTemplate
                     .send(
-                            TRIP_REQUESTED_TOPIC,
+                            topic,
                             event.getAggregateId().toString(),
                             event.getPayload()
                     )

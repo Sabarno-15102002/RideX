@@ -30,5 +30,11 @@ create_topic "trip.requested" 3
 create_topic "trip.requested.DLT" 3
 create_topic "driver.match.requested" 3
 create_topic "driver.match.requested.DLT" 3
+create_topic "driver.ride.accepted" 3
+create_topic "driver.ride.accepted.DLT" 3
+create_topic "driver.ride.rejected" 3
+create_topic "driver.ride.rejected.DLT" 3
+create_topic "trip.rematching" 3
+create_topic "trip.rematching.DLT" 3
 
 echo "Kafka topic setup completed."

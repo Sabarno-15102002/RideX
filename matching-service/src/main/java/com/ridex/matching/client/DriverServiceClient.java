@@ -9,31 +9,27 @@ import org.springframework.web.client.RestClient;
 import com.ridex.matching.dto.request.ReserveDriverRequest;
 import com.ridex.matching.dto.response.DriverReservationResponse;
 
+import lombok.RequiredArgsConstructor;
+
 @Component
+@RequiredArgsConstructor 
 public class DriverServiceClient {
 
-    private final RestClient restClient;
+    private final RestClient.Builder restClientBuilder;
 
-    public DriverServiceClient(
-            @Value("${ridex.services.driver.base-url}")
-            String driverServiceUrl
-    ) {
-        this.restClient = RestClient.builder()
-                .baseUrl(driverServiceUrl)
-                .build();
-    }
+    @Value("${ridex.services.driver.base-url}")
+    private String baseUrl;
 
-    public boolean reserveDriver(
-            UUID driverId,
-            UUID tripId
-    ) {
-        DriverReservationResponse response =
-                restClient.post()
-                        .uri("/api/v1/internal/drivers/{driverId}/reservations",
-                                driverId)
-                        .body(new ReserveDriverRequest(tripId))
-                        .retrieve()
-                        .body(DriverReservationResponse.class);
+    public boolean reserveDriver(UUID driverId, UUID tripId) {
+
+        DriverReservationResponse response = restClientBuilder
+                .baseUrl(baseUrl)
+                .build()
+                .post()
+                .uri("/api/v1/internal/drivers/{driverId}/reservations", driverId)
+                .body(new ReserveDriverRequest(tripId))
+                .retrieve()
+                .body(DriverReservationResponse.class);
 
         return response != null && response.reserved();
     }

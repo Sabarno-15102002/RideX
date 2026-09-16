@@ -18,6 +18,9 @@ import lombok.extern.slf4j.Slf4j;
 public class OutboxPublisher {
 
     private static final String DRIVER_STATUS_CHANGED_TOPIC = "driver.status.changed";
+    private static final String DRIVER_RIDE_ACCEPTED_TOPIC = "driver.ride.accepted";
+    private static final String DRIVER_RIDE_REJECTED_TOPIC = "driver.ride.rejected";
+    private static final String DRIVER_RIDE_EXPIRED_TOPIC = "driver.ride.expired";
 
     private final OutboxEventRepository outboxEventRepository;
 
@@ -47,10 +50,34 @@ public class OutboxPublisher {
 
     private void publish(OutboxEvent event) {
 
+        String topic;
+        String eventType = event.getEventType();
+        switch (eventType) {
+            case "DRIVER_STATUS_CHANGED":
+                topic = DRIVER_STATUS_CHANGED_TOPIC;
+                break;
+
+            case "DRIVER_RIDE_ACCEPTED":
+                topic = DRIVER_RIDE_ACCEPTED_TOPIC;
+                break;
+            
+            case "DRIVER_RIDE_REJECTED":
+                topic = DRIVER_RIDE_REJECTED_TOPIC;
+                break;
+
+            case "DRIVER_RIDE_EXPIRED":
+                topic = DRIVER_RIDE_EXPIRED_TOPIC;
+                break;
+        
+            default:
+                topic = DRIVER_RIDE_ACCEPTED_TOPIC;
+                break;
+        }
+
         try {
             kafkaTemplate
                     .send(
-                            DRIVER_STATUS_CHANGED_TOPIC,
+                            topic,
                             event.getAggregateId().toString(),
                             event.getPayload()
                     )

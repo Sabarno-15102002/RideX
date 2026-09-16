@@ -13,8 +13,11 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
-import com.ridex.trip.event.DriverMatchRequestedEvent;
-import com.ridex.trip.event.RiderCreatedEvent;
+import com.ridex.trip.event.event.DriverMatchRequestedEvent;
+import com.ridex.trip.event.event.DriverRideAcceptedEvent;
+import com.ridex.trip.event.event.DriverRideExpiredEvent;
+import com.ridex.trip.event.event.DriverRideRejectedEvent;
+import com.ridex.trip.event.event.RiderCreatedEvent;
 
 @Configuration
 public class KafkaConsumerConfig {
@@ -82,6 +85,42 @@ public class KafkaConsumerConfig {
         }
 
         @Bean
+        public ConsumerFactory<String, DriverRideAcceptedEvent> driverRideAcceptedConsumerFactory() {
+
+                Map<String, Object> config = consumerProperties();
+
+                config.put(
+                                JsonDeserializer.VALUE_DEFAULT_TYPE,
+                                DriverRideAcceptedEvent.class);
+
+                return new DefaultKafkaConsumerFactory<>(config);
+        }
+
+        @Bean
+        public ConsumerFactory<String, DriverRideRejectedEvent> driverRideRejectedConsumerFactory() {
+
+                Map<String, Object> config = consumerProperties();
+
+                config.put(
+                                JsonDeserializer.VALUE_DEFAULT_TYPE,
+                                DriverRideAcceptedEvent.class);
+
+                return new DefaultKafkaConsumerFactory<>(config);
+        }
+
+        @Bean
+        public ConsumerFactory<String, DriverRideExpiredEvent> driverRideExpiredConsumerFactory() {
+
+                Map<String, Object> config = consumerProperties();
+
+                config.put(
+                                JsonDeserializer.VALUE_DEFAULT_TYPE,
+                                DriverRideAcceptedEvent.class);
+
+                return new DefaultKafkaConsumerFactory<>(config);
+        }
+
+        @Bean
         public ConcurrentKafkaListenerContainerFactory<String, RiderCreatedEvent> riderCreatedKafkaListenerContainerFactory(
                         ConsumerFactory<String, RiderCreatedEvent> consumerFactory) {
 
@@ -97,6 +136,39 @@ public class KafkaConsumerConfig {
                         ConsumerFactory<String, DriverMatchRequestedEvent> consumerFactory) {
 
                 ConcurrentKafkaListenerContainerFactory<String, DriverMatchRequestedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+
+                factory.setConsumerFactory(consumerFactory);
+
+                return factory;
+        }
+
+        @Bean
+        public ConcurrentKafkaListenerContainerFactory<String, DriverRideAcceptedEvent> driverRideAcceptedKafkaListenerContainerFactory(
+                        ConsumerFactory<String, DriverRideAcceptedEvent> consumerFactory) {
+
+                ConcurrentKafkaListenerContainerFactory<String, DriverRideAcceptedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+
+                factory.setConsumerFactory(consumerFactory);
+
+                return factory;
+        }
+
+        @Bean
+        public ConcurrentKafkaListenerContainerFactory<String, DriverRideRejectedEvent> driverRideRejectedKafkaListenerContainerFactory(
+                        ConsumerFactory<String, DriverRideRejectedEvent> consumerFactory) {
+
+                ConcurrentKafkaListenerContainerFactory<String, DriverRideRejectedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+
+                factory.setConsumerFactory(consumerFactory);
+
+                return factory;
+        }
+
+        @Bean
+        public ConcurrentKafkaListenerContainerFactory<String, DriverRideExpiredEvent> driverRideExpiredKafkaListenerContainerFactory(
+                        ConsumerFactory<String, DriverRideExpiredEvent> consumerFactory) {
+
+                ConcurrentKafkaListenerContainerFactory<String, DriverRideExpiredEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
                 factory.setConsumerFactory(consumerFactory);
 

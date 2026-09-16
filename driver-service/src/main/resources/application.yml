@@ -42,3 +42,7 @@ management:
 jwt:
   secret: ${JWT_SECRET:change-this-secret-key-to-a-long-random-value}
   expiration-ms: ${JWT_EXPIRATION_MS:900000}
+
+ridex:
+  driver:
+    reservation-expiry-interval-ms: 5000

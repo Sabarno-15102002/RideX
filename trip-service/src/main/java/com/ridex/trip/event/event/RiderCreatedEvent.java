@@ -1,4 +1,4 @@
-package com.ridex.trip.event;
+package com.ridex.trip.event.event;
 
 import java.time.Instant;
 import java.util.UUID;

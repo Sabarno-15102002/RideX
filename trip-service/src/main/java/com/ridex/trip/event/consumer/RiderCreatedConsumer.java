@@ -1,8 +1,9 @@
-package com.ridex.trip.event;
+package com.ridex.trip.event.consumer;
 
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
+import com.ridex.trip.event.event.RiderCreatedEvent;
 import com.ridex.trip.service.RiderIdentityService;
 
 import lombok.RequiredArgsConstructor;
