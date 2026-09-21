@@ -18,42 +18,38 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+        private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(
-            HttpSecurity http
-    ) throws Exception {
+        @Bean
+        public SecurityFilterChain securityFilterChain(
+                        HttpSecurity http) throws Exception {
 
-        return http
-                .csrf(csrf -> csrf.disable())
+                return http
+                                .csrf(csrf -> csrf.disable())
 
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(
-                                SessionCreationPolicy.STATELESS
-                        )
-                )
+                                .sessionManagement(session -> session.sessionCreationPolicy(
+                                                SessionCreationPolicy.STATELESS))
 
-                .authorizeHttpRequests(auth ->
-                        auth
-                                .requestMatchers(
-                                        "/actuator/health",
-                                        "/api/v1/internal/**"
-                                ).permitAll()
-                                .anyRequest()
-                                .authenticated()
-                )
+                                .authorizeHttpRequests(auth -> auth
+                                        .requestMatchers(
+                                                        "/actuator/health",
+                                                        "/api/v1/internal/**")
+                                        .permitAll()
+                                        .requestMatchers(
+                                                        "/api/v1/drivers/me/trips/**")
+                                        .hasRole("DRIVER")
+                                        .anyRequest()
+                                        .authenticated())
 
-                .addFilterBefore(
-                        jwtAuthenticationFilter,
-                        UsernamePasswordAuthenticationFilter.class
-                )
+                                .addFilterBefore(
+                                        jwtAuthenticationFilter,
+                                        UsernamePasswordAuthenticationFilter.class)
 
-                .build();
-    }
+                                .build();
+        }
 
-    @Bean
-    public ObjectMapper objectMapper() {
-        return new ObjectMapper().registerModule(new JavaTimeModule());
-    }
+        @Bean
+        public ObjectMapper objectMapper() {
+                return new ObjectMapper().registerModule(new JavaTimeModule());
+        }
 }

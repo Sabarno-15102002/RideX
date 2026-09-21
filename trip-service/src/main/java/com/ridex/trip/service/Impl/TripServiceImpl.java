@@ -12,10 +12,14 @@ import com.ridex.trip.dto.response.TripResponse;
 import com.ridex.trip.entity.ProcessedEvent;
 import com.ridex.trip.entity.RiderIdentity;
 import com.ridex.trip.entity.Trip;
+import com.ridex.trip.event.event.DriverArrivedEvent;
 import com.ridex.trip.event.event.DriverMatchRequestedEvent;
 import com.ridex.trip.event.event.DriverRideAcceptedEvent;
 import com.ridex.trip.event.event.DriverRideExpiredEvent;
 import com.ridex.trip.event.event.DriverRideRejectedEvent;
+import com.ridex.trip.event.event.DriverTripCompletedEvent;
+import com.ridex.trip.event.event.DriverTripStartedEvent;
+import com.ridex.trip.event.event.TripCompletedEvent;
 import com.ridex.trip.event.event.TripRematchingEvent;
 import com.ridex.trip.event.event.TripRequestedEvent;
 import com.ridex.trip.repository.ProcessedEventRepository;
@@ -197,7 +201,7 @@ public class TripServiceImpl implements TripService {
                                                 Instant.now()));
         }
 
-        @Override 
+        @Override
         @Transactional
         public void handleDriverRideExpired(DriverRideExpiredEvent event) {
 
@@ -246,5 +250,121 @@ public class TripServiceImpl implements TripService {
                                 new ProcessedEvent(
                                                 event.eventId(),
                                                 now));
+        }
+
+        @Override
+        @Transactional
+        public void handleDriverArrived(DriverArrivedEvent event) {
+
+                if (processedEventRepository.existsById(event.eventId())) {
+                        return;
+                }
+
+                Trip trip = tripRepository.findById(event.tripId())
+                                .orElseThrow(() -> new IllegalArgumentException(
+                                                "Trip not found: " + event.tripId()));
+
+                if (trip.getStatus() != TripStatus.DRIVER_ARRIVING) {
+                        return;
+                }
+
+                if (!event.driverId().equals(trip.getDriverId())) {
+                        throw new IllegalStateException(
+                                        "Arriving driver does not match assigned driver");
+                }
+
+                Instant now = Instant.now();
+
+                trip.setStatus(TripStatus.DRIVER_ARRIVED);
+                trip.setUpdatedAt(now);
+
+                tripRepository.save(trip);
+
+                processedEventRepository.save(
+                                new ProcessedEvent(
+                                                event.eventId(),
+                                                now));
+        }
+
+        @Override
+        @Transactional
+        public void handleDriverTripStarted(DriverTripStartedEvent event) {
+
+                if (processedEventRepository.existsById(event.eventId())) {
+                        return;
+                }
+
+                Trip trip = tripRepository.findById(event.tripId())
+                                .orElseThrow(() -> new IllegalArgumentException(
+                                                "Trip not found: " + event.tripId()));
+
+                if (trip.getStatus() != TripStatus.DRIVER_ARRIVED) {
+                        return;
+                }
+
+                if (!event.driverId().equals(trip.getDriverId())) {
+                        throw new IllegalStateException(
+                                        "Starting driver does not match assigned driver");
+                }
+
+                Instant now = Instant.now();
+
+                trip.setStatus(TripStatus.TRIP_STARTED);
+                trip.setStartedAt(event.startedAt());
+                trip.setUpdatedAt(now);
+
+                tripRepository.save(trip);
+
+                processedEventRepository.save(
+                                new ProcessedEvent(
+                                                event.eventId(),
+                                                now));
+        }
+
+        @Override 
+        @Transactional
+        public void handleDriverTripCompleted(
+                        DriverTripCompletedEvent event) {
+
+                if (processedEventRepository.existsById(event.eventId())) {
+                        return;
+                }
+
+                Trip trip = tripRepository.findById(event.tripId())
+                                .orElseThrow(() -> new IllegalArgumentException(
+                                                "Trip not found: " + event.tripId()));
+
+                if (trip.getStatus() != TripStatus.TRIP_STARTED) {
+                        return;
+                }
+
+                if (!event.driverId().equals(trip.getDriverId())) {
+                        throw new IllegalStateException(
+                                        "Completing driver does not match assigned driver");
+                }
+
+                Instant now = Instant.now();
+
+                trip.setStatus(TripStatus.TRIP_COMPLETED);
+                trip.setCompletedAt(event.completedAt());
+                trip.setUpdatedAt(now);
+
+                tripRepository.save(trip);
+
+                processedEventRepository.save(
+                                new ProcessedEvent(
+                                                event.eventId(),
+                                                now));
+
+                TripCompletedEvent tripCompletedEvent = new TripCompletedEvent(
+                        UUID.randomUUID(),
+                        trip.getId(),
+                        trip.getRiderId(),
+                        trip.getDriverId(),
+                        event.completedAt()
+                );
+
+                outboxEventService.saveTripCompletedEvent(tripCompletedEvent);
+
         }
 }

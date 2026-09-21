@@ -202,4 +202,12 @@ public class DriverReservationServiceImpl implements DriverReservationService {
 
                 }
         }
+
+        @Override 
+        public DriverReservation findDriverReservation(UUID tripId){
+                return reservationRepository
+                                .findByTripIdForUpdate(tripId)
+                                .orElseThrow(() -> new IllegalArgumentException(
+                                                "Reservation not found"));
+        }
 }

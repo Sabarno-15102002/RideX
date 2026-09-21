@@ -19,6 +19,7 @@ public class OutboxPublisher {
 
     private static final String TRIP_REQUESTED_TOPIC = "trip.requested";
     private static final String TRIP_REMATCHING_TOPIC = "trip.rematching";
+    private static final String TRIP_COMPLETED_TOPIC = "trip.completed";
 
     private final OutboxEventRepository outboxEventRepository;
 
@@ -57,6 +58,10 @@ public class OutboxPublisher {
 
             case "TRIP_REMATCHING":
                 topic = TRIP_REMATCHING_TOPIC;
+                break;
+
+            case "TRIP_COMPLETED":
+                topic = TRIP_COMPLETED_TOPIC;
                 break;
         
             default:

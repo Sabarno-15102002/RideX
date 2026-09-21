@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import com.ridex.location.dto.request.DriverLocationUpdate;
 import com.ridex.location.dto.response.NearbyDriverResponse;
 import com.ridex.location.event.DriverStatusChangedEvent;
+import com.ridex.location.event.TripCompletedEvent;
 import com.ridex.location.service.DriverLocationService;
 
 import lombok.RequiredArgsConstructor;
@@ -78,24 +79,20 @@ public class DriverLocationServiceImpl implements DriverLocationService {
                                 driverId,
                                 latitude,
                                 longitude,
-                                result
-                        );
+                                result);
 
                 messagingTemplate.convertAndSend(
-                        "/topic/drivers/" + driverId + "/location",
-                        new DriverLocationUpdate(
+                                "/topic/drivers/" + driverId + "/location",
+                                new DriverLocationUpdate(
+                                                driverId,
+                                                latitude,
+                                                longitude,
+                                                Instant.now()));
+                log.info(
+                                "WebSocket message sent: driverId={}, latitude={}, longitude={}",
                                 driverId,
                                 latitude,
-                                longitude,
-                                Instant.now()
-                        )
-                );
-                log.info(
-                        "WebSocket message sent: driverId={}, latitude={}, longitude={}",
-                        driverId,
-                        latitude,
-                        longitude
-                );
+                                longitude);
         }
 
         @Override
@@ -199,5 +196,16 @@ public class DriverLocationServiceImpl implements DriverLocationService {
                 }
 
                 return status.toString();
+        }
+
+        @Override 
+        public void handleTripCompleted(TripCompletedEvent event) {
+
+                Boolean alreadyProcessed = redisTemplate.opsForSet().isMember(PROCESSED_EVENTS_KEY,
+                                event.eventId().toString());
+
+                if (Boolean.TRUE.equals(alreadyProcessed)) {
+                        // return;
+                }
         }
 }

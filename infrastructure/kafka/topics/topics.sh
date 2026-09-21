@@ -34,7 +34,17 @@ create_topic "driver.ride.accepted" 3
 create_topic "driver.ride.accepted.DLT" 3
 create_topic "driver.ride.rejected" 3
 create_topic "driver.ride.rejected.DLT" 3
+create_topic "driver.ride.expired" 3
+create_topic "driver.ride.expired.DLT" 3
+create_topic "driver.arrived" 3
+create_topic "driver.arrived.DLT" 3
+create_topic "driver.trip.started" 3
+create_topic "driver.trip.started.DLT" 3
+create_topic "driver.trip.completed" 3
+create_topic "driver.trip.completed.DLT" 3
 create_topic "trip.rematching" 3
 create_topic "trip.rematching.DLT" 3
+create_topic "trip.completed" 3
+create_topic "trip.completed.DLT" 3
 
 echo "Kafka topic setup completed."

@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 
 import com.ridex.trip.entity.OutboxEvent;
 import com.ridex.trip.event.EventSerializer;
+import com.ridex.trip.event.event.TripCompletedEvent;
 import com.ridex.trip.event.event.TripRematchingEvent;
 import com.ridex.trip.event.event.TripRequestedEvent;
 import com.ridex.trip.repository.OutboxEventRepository;
@@ -38,6 +39,19 @@ public class OutboxEventService {
                 .aggregateType("TRIP")
                 .aggregateId(event.tripId())
                 .eventType("TRIP_REMATCHING")
+                .payload(eventSerializer.serialize(event))
+                .build();
+
+        outboxEventRepository.save(outboxEvent);
+    }
+
+    public void saveTripCompletedEvent(TripCompletedEvent event) {
+        
+        OutboxEvent outboxEvent = OutboxEvent.builder()
+                .id(event.eventId())
+                .aggregateType("TRIP")
+                .aggregateId(event.tripId())
+                .eventType("TRIP_COMPLETED")
                 .payload(eventSerializer.serialize(event))
                 .build();
 

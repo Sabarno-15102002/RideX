@@ -21,6 +21,9 @@ public class OutboxPublisher {
     private static final String DRIVER_RIDE_ACCEPTED_TOPIC = "driver.ride.accepted";
     private static final String DRIVER_RIDE_REJECTED_TOPIC = "driver.ride.rejected";
     private static final String DRIVER_RIDE_EXPIRED_TOPIC = "driver.ride.expired";
+    private static final String DRIVER_RIDE_ARRIVED_TOPIC = "driver.arrived";
+    private static final String DRIVER_RIDE_STARTED_TOPIC = "driver.trip.started";
+    private static final String DRIVER_RIDE_COMPLETED_TOPIC = "driver.trip.completed";
 
     private final OutboxEventRepository outboxEventRepository;
 
@@ -67,6 +70,18 @@ public class OutboxPublisher {
 
             case "DRIVER_RIDE_EXPIRED":
                 topic = DRIVER_RIDE_EXPIRED_TOPIC;
+                break;
+            
+            case "DRIVER_ARRIVED":
+                topic = DRIVER_RIDE_ARRIVED_TOPIC;
+                break;
+            
+            case "DRIVER_TRIP_STARTED":
+                topic = DRIVER_RIDE_STARTED_TOPIC;
+                break;
+
+            case "DRIVER_TRIP_COMPLETED":
+                topic = DRIVER_RIDE_COMPLETED_TOPIC;
                 break;
         
             default:

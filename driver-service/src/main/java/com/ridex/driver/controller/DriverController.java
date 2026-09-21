@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +19,7 @@ import com.ridex.driver.dto.response.DriverResponse;
 import com.ridex.driver.dto.response.VehicleResponse;
 import com.ridex.driver.service.DriverOnboardingService;
 import com.ridex.driver.service.DriverService;
+import com.ridex.driver.service.DriverTripService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -28,6 +30,7 @@ public class DriverController {
 
         private final DriverOnboardingService driverOnboardingService;
         private final DriverService driverService;
+        private final DriverTripService driverTripService;
 
         @PutMapping("/{driverId}/onboarding")
         public ResponseEntity<Void> onboardDriver(
@@ -63,5 +66,50 @@ public class DriverController {
 
                 return ResponseEntity.ok(
                                 driverService.getVehicle(driverId));
+        }
+
+        @PostMapping("/me/trips/{tripId}/accept")
+        public ResponseEntity<Void> acceptTrip(@PathVariable UUID tripId) {
+
+                UUID userId = SecurityUtils.getCurrentUserId();
+                driverTripService.acceptTrip(userId, tripId);
+
+                return ResponseEntity.noContent().build();
+        }
+
+        @PostMapping("/me/trips/{tripId}/reject")
+        public ResponseEntity<Void> rejectTrip(@PathVariable UUID tripId) {
+
+                UUID userId = SecurityUtils.getCurrentUserId();
+                driverTripService.rejectTrip(userId, tripId);
+
+                return ResponseEntity.noContent().build();
+        }
+
+        @PostMapping("/me/trips/{tripId}/arrive")
+        public ResponseEntity<Void> arriveAtPickup(@PathVariable UUID tripId) {
+                UUID userId = SecurityUtils.getCurrentUserId();
+                
+                driverTripService.arriveAtPickup(userId, tripId);
+                
+                return ResponseEntity.noContent().build();
+        }
+        
+        @PostMapping("/me/trips/{tripId}/start")
+        public ResponseEntity<Void> startTrip(@PathVariable UUID tripId) {
+                
+                UUID userId = SecurityUtils.getCurrentUserId();
+                driverTripService.startTrip(userId, tripId);
+                
+                return ResponseEntity.noContent().build();
+        }
+        
+        @PostMapping("/me/trips/{tripId}/complete")
+        public ResponseEntity<Void> completeTrip(@PathVariable UUID tripId) {
+                
+                UUID userId = SecurityUtils.getCurrentUserId();
+                driverTripService.completeTrip(userId, tripId);
+
+                return ResponseEntity.noContent().build();
         }
 }

@@ -4,84 +4,102 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.listener.DefaultErrorHandler;
+import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
+
+import com.ridex.driver.event.TripCompletedEvent;
 import com.ridex.driver.event.UserRegisteredEvent;
 
 @Configuration
 public class KafkaConsumerConfig {
 
-    @Value("${spring.kafka.bootstrap-servers}")
-    private String bootstrapServers;
+        @Value("${spring.kafka.bootstrap-servers}")
+        private String bootstrapServers;
 
-    @Bean
-    public ConsumerFactory<String, UserRegisteredEvent> consumerFactory() {
+        private Map<String, Object> consumerProperties() {
 
-        JsonDeserializer<UserRegisteredEvent> deserializer =
-                new JsonDeserializer<>(UserRegisteredEvent.class);
+                Map<String, Object> config = new HashMap<>();
 
-        deserializer.setUseTypeHeaders(false);
-        deserializer.addTrustedPackages("com.ridex.driver.event");
+                config.put(
+                                ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
+                                bootstrapServers);
 
-        Map<String, Object> config = new HashMap<>();
+                config.put(
+                                ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
+                                ErrorHandlingDeserializer.class);
 
-        config.put(
-                ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
-                bootstrapServers
-        );
+                config.put(
+                                ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
+                                ErrorHandlingDeserializer.class);
 
-        config.put(
-                ConsumerConfig.GROUP_ID_CONFIG,
-                "driver-service"
-        );
+                config.put(
+                                ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS,
+                                JsonDeserializer.class);
 
-        config.put(
-                ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
-                StringDeserializer.class
-        );
+                config.put(
+                                JsonDeserializer.TRUSTED_PACKAGES,
+                                "com.ridex.trip.event");
 
-        config.put(
-                ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
-                JsonDeserializer.class
-        );
+                config.put(
+                                ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG,
+                                false);
 
-        config.put(
-                ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,
-                "earliest"
-        );
+                config.put(
+                                ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,
+                                "earliest");
 
-        config.put(
-                ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG,
-                false
-        );
+                return config;
+        }
 
-        return new DefaultKafkaConsumerFactory<>(
-                config,
-                new StringDeserializer(),
-                deserializer
-        );
-    }
+        @Bean
+        public ConsumerFactory<String, UserRegisteredEvent> userRegisteredConsumerFactory() {
 
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, UserRegisteredEvent>
-    kafkaListenerContainerFactory(
-            ConsumerFactory<String, UserRegisteredEvent> consumerFactory,
-            DefaultErrorHandler errorHandler
-    ) {
+                Map<String, Object> config = consumerProperties();
 
-        ConcurrentKafkaListenerContainerFactory<String, UserRegisteredEvent> factory =
-                new ConcurrentKafkaListenerContainerFactory<>();
+                config.put(
+                                JsonDeserializer.VALUE_DEFAULT_TYPE,
+                                UserRegisteredEvent.class);
 
-        factory.setConsumerFactory(consumerFactory);
-        factory.setCommonErrorHandler(errorHandler);
+                return new DefaultKafkaConsumerFactory<>(config);
+        }
 
-        return factory;
-    }
+        @Bean
+        public ConsumerFactory<String, TripCompletedEvent> tripCompletedConsumerFactory() {
+
+                Map<String, Object> config = consumerProperties();
+
+                config.put(
+                                JsonDeserializer.VALUE_DEFAULT_TYPE,
+                                TripCompletedEvent.class);
+
+                return new DefaultKafkaConsumerFactory<>(config);
+        }
+
+        @Bean
+        public ConcurrentKafkaListenerContainerFactory<String, UserRegisteredEvent> driverRegisteredKafkaListenerContainerFactory(
+                        ConsumerFactory<String, UserRegisteredEvent> consumerFactory) {
+
+                ConcurrentKafkaListenerContainerFactory<String, UserRegisteredEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+
+                factory.setConsumerFactory(consumerFactory);
+
+                return factory;
+        }
+
+        @Bean
+        public ConcurrentKafkaListenerContainerFactory<String, TripCompletedEvent> tripCompletedKafkaListenerContainerFactory(
+                        ConsumerFactory<String, TripCompletedEvent> consumerFactory) {
+
+                ConcurrentKafkaListenerContainerFactory<String, TripCompletedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+
+                factory.setConsumerFactory(consumerFactory);
+
+                return factory;
+        }
 }

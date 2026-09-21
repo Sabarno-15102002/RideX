@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import com.ridex.location.dto.response.NearbyDriverResponse;
 import com.ridex.location.event.DriverStatusChangedEvent;
+import com.ridex.location.event.TripCompletedEvent;
 
 public interface DriverLocationService {
 
@@ -17,5 +18,7 @@ public interface DriverLocationService {
     void updateDriverIdentity(UUID userId, UUID driverId);
 
     void updateDriverStatus(UUID driverId, String status);
+
+    void handleTripCompleted(TripCompletedEvent event);
 
 }

@@ -18,7 +18,7 @@ public class UserRegisteredConsumer {
     @KafkaListener(
             topics = "user.registered",
             groupId = "driver-service",
-            containerFactory = "kafkaListenerContainerFactory"
+            containerFactory = "driverRegisteredKafkaListenerContainerFactory"
     )
     public void consume(UserRegisteredEvent event) {
 
