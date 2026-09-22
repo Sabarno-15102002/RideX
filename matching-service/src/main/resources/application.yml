@@ -26,7 +26,6 @@ spring:
 
           properties:
               spring.json.trusted.packages: "com.ridex.matching.event"
-              spring.json.value.default.type: "com.ridex.matching.event.TripRequestedEvent"
 
 server:
   port: ${SERVER_PORT:8086}

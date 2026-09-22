@@ -28,7 +28,6 @@ spring:
       
       properties:
         spring.json.trusted.packages: "com.ridex.rider.event"
-        spring.json.value.default.type: "com.ridex.rider.event.UserRegisteredEvent"
 
 server:
   port: ${SERVER_PORT:8082}

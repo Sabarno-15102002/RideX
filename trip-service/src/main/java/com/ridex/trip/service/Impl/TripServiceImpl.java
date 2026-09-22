@@ -321,7 +321,7 @@ public class TripServiceImpl implements TripService {
                                                 now));
         }
 
-        @Override 
+        @Override
         @Transactional
         public void handleDriverTripCompleted(
                         DriverTripCompletedEvent event) {
@@ -357,12 +357,19 @@ public class TripServiceImpl implements TripService {
                                                 now));
 
                 TripCompletedEvent tripCompletedEvent = new TripCompletedEvent(
-                        UUID.randomUUID(),
-                        trip.getId(),
-                        trip.getRiderId(),
-                        trip.getDriverId(),
-                        event.completedAt()
-                );
+                                UUID.randomUUID(),
+                                trip.getId(),
+                                trip.getRiderId(),
+                                trip.getDriverId(),
+
+                                trip.getPickupLatitude(),
+                                trip.getPickupLongitude(),
+
+                                trip.getDropoffLatitude(),
+                                trip.getDropoffLongitude(),
+
+                                trip.getStartedAt(),
+                                event.completedAt());
 
                 outboxEventService.saveTripCompletedEvent(tripCompletedEvent);
 

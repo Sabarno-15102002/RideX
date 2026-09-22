@@ -20,7 +20,6 @@ spring:
 
       properties:
         spring.json.trusted.packages: "com.ridex.location.event"
-        spring.json.value.default.type: "com.ridex.location.event.DriverStatusChangedEvent"
 
 server:
   port: ${SERVER_PORT:8084}

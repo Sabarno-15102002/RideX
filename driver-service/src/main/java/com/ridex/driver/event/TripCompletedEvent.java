@@ -8,5 +8,13 @@ public record TripCompletedEvent(
         UUID tripId,
         UUID riderId,
         UUID driverId,
+
+        double pickupLatitude,
+        double pickupLongitude,
+
+        double dropoffLatitude,
+        double dropoffLongitude,
+
+        Instant startedAt,
         Instant completedAt
 ) {}
