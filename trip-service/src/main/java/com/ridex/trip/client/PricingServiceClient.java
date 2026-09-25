@@ -8,21 +8,22 @@ import org.springframework.web.client.RestClient;
 
 import com.ridex.trip.dto.response.FareQuoteResponse;
 
-import lombok.RequiredArgsConstructor;
-
 @Component
-@RequiredArgsConstructor
 public class PricingServiceClient {
 
-    private final RestClient.Builder pricingRestClientBuilder;
+    private final RestClient pricingRestClient;
 
-    @Value("${ridex.services.pricing.base-url}")
-    private String baseUrl;
+    public PricingServiceClient(
+            @Value("${ridex.services.pricing.base-url}")
+            String pricingServiceUrl
+    ) {
+        this.pricingRestClient = RestClient.builder()
+                .baseUrl(pricingServiceUrl)
+                .build();
+    }
 
     public FareQuoteResponse getFareQuote(UUID tripId) {
-        return pricingRestClientBuilder
-                .baseUrl(baseUrl)
-                .build()
+        return pricingRestClient
                 .get()
                 .uri("/api/v1/pricing/trips/{tripId}", tripId)
                 .retrieve()
