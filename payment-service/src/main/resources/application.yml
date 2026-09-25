@@ -1,0 +1,50 @@
+spring:
+    application:
+        name: payment-service
+
+    datasource:
+        url: ${DB_URL:jdbc:postgresql://localhost:5432/payment_db}
+        username: ${DB_USERNAME:postgres}
+        password: ${DB_PASSWORD:postgres}
+
+    jpa:
+        hibernate:
+            ddl-auto: validate
+        open-in-view: false
+
+    flyway:
+        enabled: true
+
+    kafka:
+        bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+
+        consumer:
+        group-id: driver-service
+        auto-offset-reset: earliest
+        enable-auto-commit: false
+
+        key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+        value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+
+        properties:
+            spring.json.trusted.packages: "com.ridex.payment.event"
+
+server:
+    port: ${SERVER_PORT:8088}
+
+management:
+    endpoints:
+        web:
+            exposure:
+                include: "*"
+
+jwt:
+    secret: ${JWT_SECRET:change-this-secret-key-to-a-long-random-value}
+    expiration-ms: ${JWT_EXPIRATION_MS:900000}
+
+ridex:
+    services:
+        pricing:
+            base-url: http://localhost:8087
+    payment:
+        provider: mock
