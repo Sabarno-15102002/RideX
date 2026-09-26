@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ridex.trip.dto.PaymentSummary;
 import com.ridex.trip.dto.TripStatus;
 import com.ridex.trip.dto.request.CreateTripRequest;
 import com.ridex.trip.dto.response.TripResponse;
@@ -24,6 +25,7 @@ import com.ridex.trip.event.event.TripRematchingEvent;
 import com.ridex.trip.event.event.TripRequestedEvent;
 import com.ridex.trip.repository.ProcessedEventRepository;
 import com.ridex.trip.repository.RiderIdentityRepository;
+import com.ridex.trip.repository.TripPaymentRepository;
 import com.ridex.trip.repository.TripRepository;
 import com.ridex.trip.service.TripService;
 import com.ridex.trip.service.util.OutboxEventService;
@@ -38,6 +40,7 @@ public class TripServiceImpl implements TripService {
         private final RiderIdentityRepository riderIdentityRepository;
         private final OutboxEventService outboxEventService;
         private final ProcessedEventRepository processedEventRepository;
+        private final TripPaymentRepository tripPaymentRepository;
 
         @Override
         @Transactional
@@ -88,7 +91,19 @@ public class TripServiceImpl implements TripService {
                                 trip.getDropoffLatitude(),
                                 trip.getDropoffLongitude(),
                                 trip.getStatus(),
-                                trip.getRequestedAt());
+                                trip.getRequestedAt(),
+                                buildPaymentSummary(trip.getId())
+                );
+        }
+
+        private PaymentSummary buildPaymentSummary(UUID tripId) {
+
+                return tripPaymentRepository.findById(tripId)
+                                .map(payment -> new PaymentSummary(
+                                                payment.getAmount(),
+                                                payment.getCurrency(),
+                                                payment.getStatus()))
+                                .orElse(null);
         }
 
         @Override

@@ -46,5 +46,11 @@ create_topic "trip.rematching" 3
 create_topic "trip.rematching.DLT" 3
 create_topic "trip.completed" 3
 create_topic "trip.completed.DLT" 3
+create_topic "payment.succeeded" 3
+create_topic "payment.succeeded.DLT" 3
+create_topic "payment.failed" 3
+create_topic "payment.failed.DLT" 3
+create_topic "payment.refunded" 3
+create_topic "payment.refunded.DLT" 3
 
 echo "Kafka topic setup completed."

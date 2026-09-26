@@ -13,6 +13,7 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
+import com.ridex.payment.event.RiderCreatedEvent;
 import com.ridex.payment.event.TripCompletedEvent;
 
 @Configuration
@@ -69,10 +70,33 @@ public class KafkaConsumerConfig {
         }
 
         @Bean
+        public ConsumerFactory<String, RiderCreatedEvent> riderCreatedEventConsumerFactory() {
+
+                Map<String, Object> config = consumerProperties();
+
+                config.put(
+                                JsonDeserializer.VALUE_DEFAULT_TYPE,
+                                RiderCreatedEvent.class);
+
+                return new DefaultKafkaConsumerFactory<>(config);
+        }
+
+        @Bean
         public ConcurrentKafkaListenerContainerFactory<String, TripCompletedEvent> tripCompletedKafkaListenerContainerFactory(
                         ConsumerFactory<String, TripCompletedEvent> consumerFactory) {
 
                 ConcurrentKafkaListenerContainerFactory<String, TripCompletedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+
+                factory.setConsumerFactory(consumerFactory);
+
+                return factory;
+        }
+
+        @Bean
+        public ConcurrentKafkaListenerContainerFactory<String, RiderCreatedEvent> riderCreatedKafkaListenerContainerFactory(
+                        ConsumerFactory<String, RiderCreatedEvent> consumerFactory) {
+
+                ConcurrentKafkaListenerContainerFactory<String, RiderCreatedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
                 factory.setConsumerFactory(consumerFactory);
 

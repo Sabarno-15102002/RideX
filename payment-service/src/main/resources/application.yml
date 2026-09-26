@@ -46,5 +46,20 @@ ridex:
     services:
         pricing:
             base-url: http://localhost:8087
+            timeout:
+                connect: 2s
+                read: 3s
     payment:
         provider: mock
+
+resilience4j:
+  retry:
+    instances:
+      pricingService:
+        max-attempts: 3
+        wait-duration: 500ms
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+        retry-exceptions:
+          - com.ridex.payment.client.PricingServiceUnavailableException
+          - org.springframework.web.client.ResourceAccessException

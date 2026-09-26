@@ -22,7 +22,11 @@ public class TripCompletedConsumer {
     private final PricingServiceClient pricingServiceClient;
     private final ProcessedEventRepository processedEventRepository;
 
-    @KafkaListener(topics = "trip.completed", groupId = "payment-service")
+    @KafkaListener(
+        topics = "trip.completed", 
+        groupId = "payment-service",
+        containerFactory = "tripCompletedKafkaListenerContainerFactory"
+    )
     @Transactional
     public void handle(TripCompletedEvent event) {
 

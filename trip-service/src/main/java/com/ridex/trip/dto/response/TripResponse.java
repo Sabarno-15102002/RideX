@@ -3,6 +3,7 @@ package com.ridex.trip.dto.response;
 import java.time.Instant;
 import java.util.UUID;
 
+import com.ridex.trip.dto.PaymentSummary;
 import com.ridex.trip.dto.TripStatus;
 
 public record TripResponse(
@@ -14,5 +15,6 @@ public record TripResponse(
         double dropoffLatitude,
         double dropoffLongitude,
         TripStatus status,
-        Instant requestedAt
+        Instant requestedAt,
+        PaymentSummary payment
 ) {}

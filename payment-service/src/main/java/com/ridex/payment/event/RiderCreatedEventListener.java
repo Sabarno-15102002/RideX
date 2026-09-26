@@ -21,7 +21,8 @@ public class RiderCreatedEventListener {
 
     @KafkaListener(
             topics = "rider.created",
-            groupId = "payment-service"
+            groupId = "payment-service",
+            containerFactory = "riderCreatedKafkaListenerContainerFactory"
     )
     @Transactional 
     public void handle(RiderCreatedEvent event) {

@@ -20,6 +20,9 @@ import com.ridex.trip.event.event.DriverRideExpiredEvent;
 import com.ridex.trip.event.event.DriverRideRejectedEvent;
 import com.ridex.trip.event.event.DriverTripCompletedEvent;
 import com.ridex.trip.event.event.DriverTripStartedEvent;
+import com.ridex.trip.event.event.PaymentFailedEvent;
+import com.ridex.trip.event.event.PaymentRefundedEvent;
+import com.ridex.trip.event.event.PaymentSucceededEvent;
 import com.ridex.trip.event.event.RiderCreatedEvent;
 
 @Configuration
@@ -160,6 +163,42 @@ public class KafkaConsumerConfig {
         }
 
         @Bean
+        public ConsumerFactory<String, PaymentSucceededEvent> paymentSucceededConsumerFactory() {
+
+                Map<String, Object> config = consumerProperties();
+
+                config.put(
+                                JsonDeserializer.VALUE_DEFAULT_TYPE,
+                                PaymentSucceededEvent.class);
+
+                return new DefaultKafkaConsumerFactory<>(config);
+        }
+
+        @Bean
+        public ConsumerFactory<String, PaymentFailedEvent> paymentFailedConsumerFactory() {
+
+                Map<String, Object> config = consumerProperties();
+
+                config.put(
+                                JsonDeserializer.VALUE_DEFAULT_TYPE,
+                                PaymentFailedEvent.class);
+
+                return new DefaultKafkaConsumerFactory<>(config);
+        }
+
+        @Bean
+        public ConsumerFactory<String, PaymentRefundedEvent> paymentRefundedConsumerFactory() {
+
+                Map<String, Object> config = consumerProperties();
+
+                config.put(
+                                JsonDeserializer.VALUE_DEFAULT_TYPE,
+                                PaymentRefundedEvent.class);
+
+                return new DefaultKafkaConsumerFactory<>(config);
+        }
+
+        @Bean
         public ConcurrentKafkaListenerContainerFactory<String, RiderCreatedEvent> riderCreatedKafkaListenerContainerFactory(
                         ConsumerFactory<String, RiderCreatedEvent> consumerFactory) {
 
@@ -241,6 +280,39 @@ public class KafkaConsumerConfig {
                         ConsumerFactory<String, DriverTripCompletedEvent> consumerFactory) {
 
                 ConcurrentKafkaListenerContainerFactory<String, DriverTripCompletedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+
+                factory.setConsumerFactory(consumerFactory);
+
+                return factory;
+        }
+
+        @Bean
+        public ConcurrentKafkaListenerContainerFactory<String, PaymentSucceededEvent> paymentSuccededKafkaListenerContainerFactory(
+                        ConsumerFactory<String, PaymentSucceededEvent> consumerFactory) {
+
+                ConcurrentKafkaListenerContainerFactory<String, PaymentSucceededEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+
+                factory.setConsumerFactory(consumerFactory);
+
+                return factory;
+        }
+
+        @Bean
+        public ConcurrentKafkaListenerContainerFactory<String, PaymentFailedEvent> paymentFailedKafkaListenerContainerFactory(
+                        ConsumerFactory<String, PaymentFailedEvent> consumerFactory) {
+
+                ConcurrentKafkaListenerContainerFactory<String, PaymentFailedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+
+                factory.setConsumerFactory(consumerFactory);
+
+                return factory;
+        }
+
+        @Bean
+        public ConcurrentKafkaListenerContainerFactory<String, PaymentRefundedEvent> paymentRefundedKafkaListenerContainerFactory(
+                        ConsumerFactory<String, PaymentRefundedEvent> consumerFactory) {
+
+                ConcurrentKafkaListenerContainerFactory<String, PaymentRefundedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
                 factory.setConsumerFactory(consumerFactory);
 
