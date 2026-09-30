@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://matching-db:5432/matching_db
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+
+server:
+  port: ${SERVER_PORT:8086}
+
+ridex:
+  services:
+    location:
+      base-url: ${LOCATION_SERVICE_URL:http://location-service:8084}
+
+    driver:
+      base-url: ${DRIVER_SERVICE_URL:http://driver-service:8083}

@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://trip-db:5432/trip_db
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+
+server:
+  port: ${SERVER_PORT:8085}
+
+ridex:
+  services:
+    pricing:
+      base-url: ${PRICING_SERVICE_URL:http://pricing-service:8087}

@@ -43,12 +43,11 @@ jwt:
     expiration-ms: ${JWT_EXPIRATION_MS:900000}
 
 ridex:
-    services:
-        pricing:
-            base-url: http://localhost:8087
-            timeout:
-                connect: 2s
-                read: 3s
+    pricing:
+        base-url: http://localhost:8087
+        timeout:
+            connect: 2s
+            read: 3s
     payment:
         provider: mock
 

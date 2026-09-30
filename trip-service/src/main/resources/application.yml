@@ -29,7 +29,10 @@ spring:
             properties:
                 spring.json.trusted.packages: "com.ridex.trip.event"
 
-
+jwt:
+  secret: ${JWT_SECRET:change-this-secret-key-to-a-long-random-value}
+  expiration-ms: ${JWT_EXPIRATION_MS:900000}
+  
 server:
   port: ${TRIP_SERVICE_PORT:8085}
 

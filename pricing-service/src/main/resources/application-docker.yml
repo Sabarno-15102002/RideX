@@ -1,0 +1,11 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://pricing-db:5432/pricing_db
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+
+server:
+  port: ${SERVER_PORT:8087}
