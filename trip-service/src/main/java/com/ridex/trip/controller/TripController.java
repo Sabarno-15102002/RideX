@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ridex.trip.config.SecurityUtils;
+import com.ridex.trip.dto.TripStatus;
 import com.ridex.trip.dto.request.CreateTripRequest;
 import com.ridex.trip.dto.response.TripPaymentResponse;
 import com.ridex.trip.dto.response.TripResponse;
@@ -42,13 +43,18 @@ public class TripController {
     }
 
     @GetMapping("/{tripId}/payment")
-    public TripPaymentResponse getPayment(@PathVariable UUID tripId) {
+    public ResponseEntity<TripPaymentResponse> getPayment(@PathVariable UUID tripId) {
 
         UUID userId = SecurityUtils.getCurrentUserId();
 
-        return queryService.getPaymentForTrip(
+        return ResponseEntity.ok(queryService.getPaymentForTrip(
                 tripId,
                 riderIdentityService.getRiderIdByUserId(userId)
-        );
+        ));
+    }
+
+    @GetMapping("/{tripId}")
+    public ResponseEntity<TripStatus> geTripStatus(@PathVariable UUID tripId){
+        return ResponseEntity.ok(tripService.geTripStatus(tripId));
     }
 }

@@ -35,7 +35,6 @@ import lombok.Setter;
 public class OutboxEvent {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(name = "aggregate_type", nullable = false, length = 100)

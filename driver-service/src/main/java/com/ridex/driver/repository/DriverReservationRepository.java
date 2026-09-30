@@ -20,6 +20,8 @@ public interface DriverReservationRepository extends JpaRepository<DriverReserva
 
     boolean existsByDriverIdAndStatus(UUID driverId, ReservationStatus status);
 
+    Optional<DriverReservation> findByTripId(UUID tripId);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
                 SELECT r

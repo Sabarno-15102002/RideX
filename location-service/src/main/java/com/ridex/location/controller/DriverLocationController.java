@@ -16,13 +16,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/v1/drivers")
+@RequestMapping("/api/v1/location")
 @RequiredArgsConstructor
 public class DriverLocationController {
 
         private final DriverLocationService driverLocationService;
 
-        @PutMapping("/me/location")
+        @PutMapping("/drivers/me")
         public ResponseEntity<Void> updateMyLocation(
                         @Valid @RequestBody UpdateLocationRequest request) {
                 UUID userId = SecurityUtils.getCurrentUserId();

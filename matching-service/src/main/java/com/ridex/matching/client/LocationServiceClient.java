@@ -9,7 +9,10 @@ import org.springframework.web.client.RestClient;
 
 import com.ridex.matching.dto.response.NearbyDriverResponse;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Component
+@Slf4j 
 public class LocationServiceClient {
 
     private final RestClient restClient;
@@ -41,7 +44,8 @@ public class LocationServiceClient {
                         .body(
                                 new ParameterizedTypeReference<>() {}
                         );
-
+        
+        log.info(response.toString());
         return response == null
                 ? List.of()
                 : response;

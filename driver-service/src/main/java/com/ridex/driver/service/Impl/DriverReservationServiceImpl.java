@@ -3,9 +3,9 @@ package com.ridex.driver.service.Impl;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,22 +50,51 @@ public class DriverReservationServiceImpl implements DriverReservationService {
                         return false;
                 }
 
+                Optional<DriverReservation> existingReservation = reservationRepository.findByTripId(tripId);
+
+                if (existingReservation.isPresent()) {
+
+                        DriverReservation reservation = existingReservation.get();
+
+                        // Same driver already reserved for this trip.
+                        if (reservation.getDriverId().equals(driverId)
+                                        && reservation.getStatus() == ReservationStatus.ACTIVE) {
+
+                                log.info(
+                                                "Driver already reserved for trip: driverId={}, tripId={}",
+                                                driverId,
+                                                tripId);
+
+                                return true;
+                        }
+
+                        // Another driver already owns this trip.
+                        log.info(
+                                        "Trip already has a reservation: tripId={}, existingDriverId={}",
+                                        tripId,
+                                        reservation.getDriverId());
+
+                        return false;
+                }
+
                 DriverReservation reservation = DriverReservation.builder()
                                 .driverId(driverId)
                                 .tripId(tripId)
                                 .status(ReservationStatus.ACTIVE)
                                 .expiresAt(
-                                                Instant.now()
-                                                                .plus(RESERVATION_DURATION))
+                                        Instant.now()
+                                        .plus(RESERVATION_DURATION))
                                 .build();
 
-                try {
-                        reservationRepository.saveAndFlush(reservation);
-                        return true;
+                reservationRepository.save(reservation);
 
-                } catch (DataIntegrityViolationException e) {
-                        return false;
-                }
+                log.info(
+                                "Driver reserved successfully: driverId={}, tripId={}",
+                                driverId,
+                                tripId);
+
+                return true;
+
         }
 
         @Override
@@ -197,14 +226,14 @@ public class DriverReservationServiceImpl implements DriverReservationService {
                                         reservation.getTripId(),
                                         reservation.getDriverId(),
                                         now);
-                        
+
                         outboxEventService.saveDriverRideExpiredEvent(event);
 
                 }
         }
 
-        @Override 
-        public DriverReservation findDriverReservation(UUID tripId){
+        @Override
+        public DriverReservation findDriverReservation(UUID tripId) {
                 return reservationRepository
                                 .findByTripIdForUpdate(tripId)
                                 .orElseThrow(() -> new IllegalArgumentException(

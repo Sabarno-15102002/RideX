@@ -18,7 +18,7 @@ public class DriverStatusChangedConsumer {
     @KafkaListener(
             topics = "driver.status.changed",
             groupId = "location-service",
-            containerFactory = "kafkaListenerContainerFactory"
+            containerFactory = "driverStatusChangedKafkaListenerContainerFactory"
     )
     public void consume(DriverStatusChangedEvent event) {
 

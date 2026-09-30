@@ -16,9 +16,11 @@ import com.ridex.rider.service.RiderRegistrationService;
 import com.ridex.rider.service.util.OutboxEventService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j 
 public class RiderRegistrationServiceImpl implements RiderRegistrationService {
 
     private final RiderRepository riderRepository;
@@ -73,7 +75,7 @@ public class RiderRegistrationServiceImpl implements RiderRegistrationService {
                 rider.getUserId(),
                 Instant.now()
         );
-
+        log.info("Publishing rider created event");
         outboxEventService.saveRiderCreatedEvent(riderCreatedEvent);
     }
 }

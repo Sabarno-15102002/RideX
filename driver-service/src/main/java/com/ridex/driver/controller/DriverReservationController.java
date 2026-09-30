@@ -15,10 +15,12 @@ import com.ridex.driver.service.DriverReservationService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/api/v1/internal/drivers")
 @RequiredArgsConstructor
+@Slf4j 
 public class DriverReservationController {
 
         private final DriverReservationService reservationService;
@@ -28,6 +30,11 @@ public class DriverReservationController {
                         @PathVariable UUID driverId,
                         @Valid @RequestBody ReserveDriverRequest request) {
 
+                log.info(
+                        "Internal driver reservation request received: driverId={}, tripId={}",
+                        driverId,
+                        request.tripId()
+                );
                 boolean reserved = reservationService.reserveDriver(
                                 driverId,
                                 request.tripId());

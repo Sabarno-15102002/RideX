@@ -127,7 +127,8 @@ public class OutboxPublisher {
 
         log.info(
                 "Published outbox event: {}",
-                event.getId()
+                event.getId(),
+                event.getPayload()
         );
     }
 }

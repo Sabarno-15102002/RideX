@@ -3,6 +3,7 @@ const WebSocket = require('ws');
 
 const client = new Client({
     brokerURL: 'ws://localhost:8084/ws/location',
+    webSocketFactory: () => new WebSocket('ws://localhost:8084/ws/location'),
 
     onConnect: () => {
         console.log('STOMP CONNECTED');
@@ -25,4 +26,5 @@ const client = new Client({
 });
 
 client.activate();
+
 console.log('Connecting...');

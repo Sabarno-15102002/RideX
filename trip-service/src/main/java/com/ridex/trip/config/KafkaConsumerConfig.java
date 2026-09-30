@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -47,6 +48,10 @@ public class KafkaConsumerConfig {
                                 ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
                                 ErrorHandlingDeserializer.class);
 
+                config.put(
+                                ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS,
+                                StringDeserializer.class);
+                                
                 config.put(
                                 ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS,
                                 JsonDeserializer.class);

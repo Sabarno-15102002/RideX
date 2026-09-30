@@ -31,9 +31,11 @@ import com.ridex.trip.service.TripService;
 import com.ridex.trip.service.util.OutboxEventService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j 
 public class TripServiceImpl implements TripService {
 
         private final TripRepository tripRepository;
@@ -54,7 +56,6 @@ public class TripServiceImpl implements TripService {
                 Instant now = Instant.now();
 
                 Trip trip = Trip.builder()
-                                .id(UUID.randomUUID())
                                 .riderId(riderIdentity.getRiderId())
                                 .pickupLatitude(request.pickupLatitude())
                                 .pickupLongitude(request.pickupLongitude())
@@ -64,12 +65,16 @@ public class TripServiceImpl implements TripService {
                                 .requestedAt(now)
                                 .build();
 
-                tripRepository.save(trip);
+                log.info("Before save: tripId={}", trip.getId());
+
+                Trip savedTrip = tripRepository.save(trip);
+
+                log.info("After save: tripId={}", savedTrip.getId());
 
                 TripRequestedEvent event = new TripRequestedEvent(
                                 UUID.randomUUID(),
-                                trip.getId(),
-                                trip.getRiderId(),
+                                savedTrip.getId(),
+                                savedTrip.getRiderId(),
                                 request.pickupLatitude(),
                                 request.pickupLongitude(),
                                 request.dropoffLatitude(),
@@ -78,7 +83,7 @@ public class TripServiceImpl implements TripService {
 
                 outboxEventService.saveTripRequestedEvent(event);
 
-                return toResponse(trip);
+                return toResponse(savedTrip);
         }
 
         private TripResponse toResponse(Trip trip) {
@@ -388,5 +393,14 @@ public class TripServiceImpl implements TripService {
 
                 outboxEventService.saveTripCompletedEvent(tripCompletedEvent);
 
+        }
+
+        @Override
+        public TripStatus geTripStatus(UUID tripId) {
+                Trip trip = tripRepository.findById(tripId)
+                                .orElseThrow(() -> new IllegalArgumentException(
+                                                "Trip not found: " + tripId));
+
+                return trip.getStatus();
         }
 }

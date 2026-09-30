@@ -41,6 +41,10 @@ public class KafkaConsumerConfig {
                                 ErrorHandlingDeserializer.class);
 
                 config.put(
+                                ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS,
+                                StringDeserializer.class);
+
+                config.put(
                                 ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS,
                                 JsonDeserializer.class);
 

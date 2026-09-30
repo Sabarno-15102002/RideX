@@ -19,9 +19,11 @@ import com.ridex.matching.service.MatchingService;
 import com.ridex.matching.service.util.OutboxEventService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MatchingServiceImpl implements MatchingService {
 
         private static final double DEFAULT_SEARCH_RADIUS_KM = 5.0;
@@ -41,6 +43,7 @@ public class MatchingServiceImpl implements MatchingService {
                                 DEFAULT_SEARCH_RADIUS_KM);
 
                 if (drivers.isEmpty()) {
+                        log.info("No drivers... matching not happened");
                         return;
                 }
 
@@ -56,6 +59,7 @@ public class MatchingServiceImpl implements MatchingService {
                                         tripEvent.tripId());
 
                         if (!reserved) {
+                                log.info("Not reserved... checking next driver");
                                 continue;
                         }
 

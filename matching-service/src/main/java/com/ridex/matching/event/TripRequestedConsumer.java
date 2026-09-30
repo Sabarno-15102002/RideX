@@ -23,7 +23,8 @@ public class TripRequestedConsumer {
     public void consume(TripRequestedEvent event) {
 
         log.info(
-                "Received TRIP_REQUESTED event: eventId={}, riderId={}",
+                "Received TRIP_REQUESTED event: eventId={}, tripId={}, riderId={}, " +
+                "pickup=({}, {}), dropoff=({}, {}), requestedAt={}",
                 event.eventId(),
                 event.tripId(),
                 event.riderId(),
