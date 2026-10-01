@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import com.ridex.matching.entity.OutboxEvent;
 import com.ridex.matching.event.DriverMatchRequestedEvent;
 import com.ridex.matching.event.EventSerializer;
-import com.ridex.matching.event.TripRematchingEvent;
 import com.ridex.matching.repository.OutboxEventRepository;
 
 import lombok.RequiredArgsConstructor;
