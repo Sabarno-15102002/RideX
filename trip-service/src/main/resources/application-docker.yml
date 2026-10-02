@@ -14,3 +14,13 @@ ridex:
   services:
     pricing:
       base-url: ${PRICING_SERVICE_URL:http://pricing-service:8087}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://eureka-server:8761/eureka/}
+    register-with-eureka: true
+    fetch-registry: true
+
+  instance:
+    prefer-ip-address: true

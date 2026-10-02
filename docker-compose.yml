@@ -11,56 +11,72 @@ services:
     build: ./auth-service
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
     depends_on:
       auth-db:
         condition: service_healthy
       kafka:
         condition: service_started
+      eureka-server:
+        condition: service_healthy
 
   rider-service:
     build: ./rider-service
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
     depends_on:
       rider-db:
         condition: service_healthy
       kafka:
         condition: service_started
+      eureka-server:
+        condition: service_healthy
 
   driver-service:
     build: ./driver-service
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
     depends_on:
       driver-db:
         condition: service_healthy
       kafka:
         condition: service_started
+      eureka-server:
+        condition: service_healthy
 
   location-service:
     build: ./location-service
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
     depends_on:
       kafka:
         condition: service_started
       redis:
         condition: service_started
+      eureka-server:
+        condition: service_healthy
 
   trip-service:
     build: ./trip-service
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
     depends_on:
       trip-db:
         condition: service_healthy
       kafka:
         condition: service_started
+      eureka-server:
+        condition: service_healthy
 
   matching-service:
     build: ./matching-service
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
     depends_on:
       matching-db:
         condition: service_healthy
@@ -70,26 +86,34 @@ services:
         condition: service_started
       driver-service:
         condition: service_started
+      eureka-server:
+        condition: service_healthy
 
   pricing-service:
     build: ./pricing-service
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
     depends_on:
       pricing-db:
         condition: service_healthy
       kafka:
         condition: service_started
+      eureka-server:
+        condition: service_healthy
 
   payment-service:
     build: ./payment-service
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
     depends_on:
       payment-db:
         condition: service_healthy
       kafka:
         condition: service_started
+      eureka-server:
+        condition: service_healthy
 
   eureka-server:
     build: ./eureka-server
