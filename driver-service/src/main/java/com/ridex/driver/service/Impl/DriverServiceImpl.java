@@ -11,13 +11,14 @@ import com.ridex.driver.dto.response.VehicleResponse;
 import com.ridex.driver.entity.Driver;
 import com.ridex.driver.entity.Vehicle;
 import com.ridex.driver.event.DriverStatusChangedEvent;
+import com.ridex.driver.exception.ResourceNotFoundException;
+import com.ridex.driver.exception.TripStateException;
 import com.ridex.driver.repository.DriverRepository;
 import com.ridex.driver.repository.VehicleRepository;
 import com.ridex.driver.service.DriverService;
 import com.ridex.driver.service.utilities.OutboxEventService;
 import com.ridex.driver.utilities.DriverStatus;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -33,7 +34,7 @@ public class DriverServiceImpl implements DriverService {
         public DriverResponse getDriver(UUID userId) {
 
                 Driver driver = driverRepository.findByUserId(userId)
-                                .orElseThrow(() -> new EntityNotFoundException(
+                                .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Driver not found: " + userId));
 
                 return new DriverResponse(
@@ -52,13 +53,13 @@ public class DriverServiceImpl implements DriverService {
                         DriverStatus requestedStatus) {
 
                 Driver driver = driverRepository.findById(driverId)
-                                .orElseThrow(() -> new EntityNotFoundException(
+                                .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Driver not found: " + driverId));
 
                 DriverStatus currentStatus = driver.getStatus();
 
                 if (!isValidTransition(currentStatus, requestedStatus)) {
-                        throw new IllegalStateException(
+                        throw new TripStateException(
                                         "Invalid driver status transition: "
                                                         + currentStatus
                                                         + " -> "
@@ -106,12 +107,12 @@ public class DriverServiceImpl implements DriverService {
 
                 // First verify that the driver exists
                 if (!driverRepository.existsById(driverId)) {
-                        throw new EntityNotFoundException(
+                        throw new ResourceNotFoundException(
                                         "Driver not found: " + driverId);
                 }
 
                 Vehicle vehicle = vehicleRepository.findFirstByDriverId(driverId)
-                                .orElseThrow(() -> new EntityNotFoundException(
+                                .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Vehicle not found for driver: " + driverId));
 
                 return new VehicleResponse(

@@ -4,7 +4,6 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.apache.kafka.common.errors.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +22,7 @@ import com.ridex.payment.event.PaymentSucceededEvent;
 import com.ridex.payment.event.TripCompletedEvent;
 import com.ridex.payment.exception.InvalidPaymentStateException;
 import com.ridex.payment.exception.PaymentProviderException;
+import com.ridex.payment.exception.ResourceNotFoundException;
 import com.ridex.payment.repository.PaymentAttemptRepository;
 import com.ridex.payment.repository.PaymentRepository;
 import com.ridex.payment.service.PaymentProvider;
@@ -162,7 +162,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         private Payment getPayment(UUID paymentId) {
                 return paymentRepository.findById(paymentId)
-                                .orElseThrow(() -> new RuntimeException(
+                                .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Payment details not found with id:" + paymentId));
         }
 

@@ -12,6 +12,7 @@ import com.ridex.payment.dto.PaymentStatus;
 import com.ridex.payment.entity.Payment;
 import com.ridex.payment.entity.PaymentAttempt;
 import com.ridex.payment.entity.PaymentProviderEvent;
+import com.ridex.payment.exception.IllegalOperationException;
 import com.ridex.payment.exception.InvalidPaymentStateException;
 import com.ridex.payment.repository.PaymentAttemptRepository;
 import com.ridex.payment.repository.PaymentProviderEventRepository;
@@ -142,7 +143,7 @@ public class PaymentWebhookServiceImpl implements PaymentWebhookService {
                                 PaymentAttemptStatus.FAILED;
 
                         default ->
-                                throw new IllegalArgumentException(
+                                throw new IllegalOperationException(
                                                 "Unsupported provider status: "
                                                                 + providerStatus);
                 };
@@ -160,7 +161,7 @@ public class PaymentWebhookServiceImpl implements PaymentWebhookService {
                                 PaymentStatus.FAILED;
 
                         case CREATED, PROCESSING ->
-                                throw new IllegalArgumentException(
+                                throw new IllegalOperationException(
                                                 "Cannot map attempt status "
                                                                 + attemptStatus
                                                                 + " to final payment status");

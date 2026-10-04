@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.ridex.trip.dto.response.TripPaymentResponse;
 import com.ridex.trip.entity.TripPayment;
+import com.ridex.trip.exception.IllegalOperationException;
 import com.ridex.trip.repository.TripPaymentRepository;
 
 @Service
@@ -29,7 +30,7 @@ public class TripPaymentQueryService {
                 );
 
         if (!payment.getRiderId().equals(authenticatedRiderId)) {
-            throw new IllegalArgumentException(
+            throw new IllegalOperationException(
                     "Rider does not own this trip"
             );
         }

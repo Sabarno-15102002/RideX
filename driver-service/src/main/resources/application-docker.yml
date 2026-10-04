@@ -12,7 +12,10 @@ server:
 
 logging:
   level:
-    org.springframework.security: DEBUG
+    com.netflix.discovery: WARN
+    com.netflix.eureka: WARN
+    org.springframework.cloud.netflix.eureka: WARN
+    org.springframework.cloud.loadbalancer: WARN
 
 eureka:
   client:

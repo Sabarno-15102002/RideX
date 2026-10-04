@@ -3,6 +3,7 @@ package com.ridex.auth.event;
 import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ridex.auth.exception.EventSerializationException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -16,7 +17,7 @@ public class EventSerializer {
         try {
             return objectMapper.writeValueAsString(event);
         } catch (JsonProcessingException e) {
-            throw new IllegalStateException(
+            throw new EventSerializationException(
                     "Failed to serialize event",
                     e
             );

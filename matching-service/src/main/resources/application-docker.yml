@@ -10,14 +10,6 @@ spring:
 server:
   port: ${SERVER_PORT:8086}
 
-ridex:
-  services:
-    location:
-      base-url: ${LOCATION_SERVICE_URL:http://location-service:8084}
-
-    driver:
-      base-url: ${DRIVER_SERVICE_URL:http://driver-service:8083}
-
 eureka:
   client:
     service-url:
@@ -27,3 +19,10 @@ eureka:
 
   instance:
     prefer-ip-address: true
+
+logging:
+  level:
+    com.netflix.discovery: WARN
+    com.netflix.eureka: WARN
+    org.springframework.cloud.netflix.eureka: WARN
+    org.springframework.cloud.loadbalancer: WARN

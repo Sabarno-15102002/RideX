@@ -24,7 +24,8 @@ public class GlobalExceptionHandler {
                                 404,
                                 "INVALID_PAYMENT_STATE",
                                 ex.getMessage(),
-                                request.getRequestURI());
+                                request.getRequestURI(),
+                                request.getHeader("X-Correlation-Id"));
 
                 return ResponseEntity
                                 .status(HttpStatus.NOT_FOUND)
@@ -41,7 +42,8 @@ public class GlobalExceptionHandler {
                                 400,
                                 "BAD_PAYMENT_REQUEST",
                                 ex.getMessage(),
-                                request.getRequestURI());
+                                request.getRequestURI(),
+                                request.getHeader("X-Correlation-Id"));
 
                 return ResponseEntity
                                 .status(HttpStatus.BAD_REQUEST)
@@ -50,7 +52,7 @@ public class GlobalExceptionHandler {
 
         @ExceptionHandler(InvalidWebhookSignatureException.class)
         public ResponseEntity<ErrorResponse> handleInvalidWebhookSignature(
-                        PaymentProviderException ex,
+                        InvalidWebhookSignatureException ex,
                         HttpServletRequest request) {
 
                 ErrorResponse response = new ErrorResponse(
@@ -58,10 +60,99 @@ public class GlobalExceptionHandler {
                                 401,
                                 "INVALID_WEBHOOK_SIGNATURE",
                                 ex.getMessage(),
-                                request.getRequestURI());
+                                request.getRequestURI(),
+                                request.getHeader("X-Correlation-Id"));
 
                 return ResponseEntity
                                 .status(HttpStatus.UNAUTHORIZED)
                                 .body(response);
+        }
+
+        @ExceptionHandler(InvalidCredentialsException.class)
+        public ResponseEntity<ErrorResponse> handleInvalidCredentials(
+                        InvalidCredentialsException ex,
+                        HttpServletRequest request) {
+
+                ErrorResponse response = new ErrorResponse(
+                                Instant.now(),
+                                401,
+                                "INVALID_CREDENTIALS",
+                                ex.getMessage(),
+                                request.getRequestURI(),
+                                request.getHeader("X-Correlation-Id"));
+
+                return ResponseEntity
+                                .status(HttpStatus.UNAUTHORIZED)
+                                .body(response);
+        }
+
+        @ExceptionHandler(EventSerializationException.class)
+        public ResponseEntity<ErrorResponse> handleEventSerializationException(
+                        EventSerializationException ex,
+                        HttpServletRequest request) {
+                ErrorResponse response = new ErrorResponse(
+                                Instant.now(),
+                                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                                "EVENT_SERIALIZATION_ERROR",
+                                ex.getMessage(),
+                                request.getRequestURI(),
+                                request.getHeader("X-Correlation-Id"));
+                return ResponseEntity
+                                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body(response);
+        }
+
+        @ExceptionHandler(IllegalOperationException.class)
+        public ResponseEntity<ErrorResponse> handleIllegalOperation(
+                        IllegalOperationException ex,
+                        HttpServletRequest request) {
+
+                ErrorResponse response = new ErrorResponse(
+                                Instant.now(),
+                                403,
+                                "ILLEGAL_OPERATION",
+                                ex.getMessage(),
+                                request.getRequestURI(),
+                                request.getHeader("X-Correlation-Id"));
+
+                return ResponseEntity
+                                .status(HttpStatus.FORBIDDEN)
+                                .body(response);
+        }
+
+        @ExceptionHandler(ResourceNotFoundException.class)
+        public ResponseEntity<ErrorResponse> handleResourceNotFound(
+                        ResourceNotFoundException ex,
+                        HttpServletRequest request) {
+
+                ErrorResponse response = new ErrorResponse(
+                                Instant.now(),
+                                404,
+                                "RESOURCE_NOT_FOUND",
+                                ex.getMessage(),
+                                request.getRequestURI(),
+                                request.getHeader("X-Correlation-Id"));
+
+                return ResponseEntity
+                                .status(HttpStatus.NOT_FOUND)
+                                .body(response);
+        }
+
+        @ExceptionHandler(Exception.class)
+        public ResponseEntity<ErrorResponse> handleGenericException(
+                        Exception ex,
+                        HttpServletRequest request) {
+
+                ErrorResponse errorResponse = new ErrorResponse(
+                                Instant.now(),
+                                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                                "INTERNAL_SERVER_ERROR",
+                                ex.getMessage(),
+                                request.getRequestURI(),
+                                request.getHeader("X-Correlation-Id"));
+
+                return ResponseEntity
+                                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body(errorResponse);
         }
 }

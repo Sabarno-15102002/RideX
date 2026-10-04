@@ -1,7 +1,6 @@
 package com.ridex.auth.exception;
 
 import java.time.Instant;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -24,7 +23,8 @@ public class GlobalExceptionHandler {
                                 409,
                                 "RESOURCE_ALREADY_EXISTS",
                                 ex.getMessage(),
-                                request.getRequestURI());
+                                request.getRequestURI(),
+                                request.getHeader("X-Correlation-Id"));
 
                 return ResponseEntity
                                 .status(HttpStatus.CONFLICT)
@@ -41,7 +41,8 @@ public class GlobalExceptionHandler {
                                 401,
                                 "INVALID_CREDENTIALS",
                                 ex.getMessage(),
-                                request.getRequestURI());
+                                request.getRequestURI(),
+                                request.getHeader("X-Correlation-Id"));
 
                 return ResponseEntity
                                 .status(HttpStatus.UNAUTHORIZED)
@@ -58,10 +59,59 @@ public class GlobalExceptionHandler {
                                 HttpStatus.UNAUTHORIZED.value(),
                                 "INVALID_REFRESH_TOKEN",
                                 ex.getMessage(),
-                                request.getRequestURI());
+                                request.getRequestURI(),
+                                request.getHeader("X-Correlation-Id"));
 
                 return ResponseEntity
                                 .status(HttpStatus.UNAUTHORIZED)
                                 .body(response);
         }
+
+        @ExceptionHandler(EventSerializationException.class)
+        public ResponseEntity<ErrorResponse> handleEventSerializationException(
+                        EventSerializationException ex,
+                        HttpServletRequest request) {
+                ErrorResponse response = new ErrorResponse(
+                                Instant.now(),
+                                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                                "EVENT_SERIALIZATION_ERROR",
+                                ex.getMessage(),
+                                request.getRequestURI(),
+                                request.getHeader("X-Correlation-Id"));
+                return ResponseEntity
+                                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body(response);
+        }
+
+        @ExceptionHandler(InvalidAlgorithmParameterException.class)
+        public ResponseEntity<ErrorResponse> handleInvalidAlgorithmParameterException(
+                        InvalidAlgorithmParameterException ex,
+                        HttpServletRequest request) {
+                ErrorResponse response = new ErrorResponse(
+                                Instant.now(),
+                                HttpStatus.BAD_REQUEST.value(),
+                                "INVALID_ALGORITHM_PARAMETER",
+                                ex.getMessage(),
+                                request.getRequestURI(),
+                                request.getHeader("X-Correlation-Id"));
+                return ResponseEntity
+                                .status(HttpStatus.BAD_REQUEST)
+                                .body(response);
+        }
+
+        @ExceptionHandler(Exception.class)
+        public ResponseEntity<ErrorResponse> handleGenericException(Exception ex, HttpServletRequest request) {
+                ErrorResponse errorResponse = new ErrorResponse(
+                                Instant.now(),
+                                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                                "INTERNAL_SERVER_ERROR",
+                                ex.getMessage(),
+                                request.getRequestURI(),
+                                request.getHeader("X-Correlation-Id"));
+
+                return ResponseEntity
+                                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body(errorResponse);
+        }
+
 }

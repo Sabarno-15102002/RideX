@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ridex.payment.entity.RiderIdentity;
 import com.ridex.payment.event.RiderCreatedEvent;
+import com.ridex.payment.exception.ResourceNotFoundException;
 import com.ridex.payment.repository.RiderIdentityRepository;
 import com.ridex.payment.service.RiderIdentityService;
 
@@ -42,7 +43,7 @@ public class RiderIdentityServiceImpl implements RiderIdentityService{
         return riderIdentityRepository.findByUserId(userId)
                 .map(RiderIdentity::getRiderId)
                 .orElseThrow(() ->
-                        new IllegalStateException(
+                        new ResourceNotFoundException(
                                 "Rider identity not found for user: "
                                         + userId
                         )

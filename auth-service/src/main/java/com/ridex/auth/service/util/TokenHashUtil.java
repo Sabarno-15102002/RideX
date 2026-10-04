@@ -7,6 +7,8 @@ import java.util.HexFormat;
 
 import org.springframework.stereotype.Component;
 
+import com.ridex.auth.exception.InvalidAlgorithmParameterException;
+
 @Component
 public class TokenHashUtil {
 
@@ -24,7 +26,7 @@ public class TokenHashUtil {
             return HexFormat.of().formatHex(hash);
 
         } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException(e);
+            throw new InvalidAlgorithmParameterException(e);
         }
     }
 }

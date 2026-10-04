@@ -6,6 +6,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.ridex.driver.dto.AuthenticatedUser;
+import com.ridex.driver.exception.InvalidCredentialsException;
 
 public final class SecurityUtils {
 
@@ -23,7 +24,7 @@ public final class SecurityUtils {
                 !(authentication.getPrincipal()
                         instanceof AuthenticatedUser user)) {
 
-            throw new IllegalStateException(
+            throw new InvalidCredentialsException(
                     "Authenticated user not found"
             );
         }

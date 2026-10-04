@@ -24,3 +24,10 @@ eureka:
 
   instance:
     prefer-ip-address: true
+
+logging:
+  level:
+    com.netflix.discovery: WARN
+    com.netflix.eureka: WARN
+    org.springframework.cloud.netflix.eureka: WARN
+    org.springframework.cloud.loadbalancer: WARN

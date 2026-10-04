@@ -3,6 +3,7 @@ package com.ridex.payment.service.provider;
 import org.springframework.stereotype.Component;
 
 import com.ridex.payment.config.PaymentProperties;
+import com.ridex.payment.exception.IllegalOperationException;
 import com.ridex.payment.service.PaymentProvider;
 
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,7 @@ public class PaymentProviderFactory {
         return switch (properties.getProvider().toLowerCase()) {
             case "mock" -> mockPaymentProvider;
 
-            default -> throw new IllegalStateException(
+            default -> throw new IllegalOperationException(
                     "Unsupported payment provider: "
                             + properties.getProvider()
             );

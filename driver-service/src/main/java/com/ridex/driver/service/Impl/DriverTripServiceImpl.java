@@ -14,6 +14,8 @@ import com.ridex.driver.event.DriverArrivedEvent;
 import com.ridex.driver.event.DriverTripCompletedEvent;
 import com.ridex.driver.event.DriverTripStartedEvent;
 import com.ridex.driver.event.TripCompletedEvent;
+import com.ridex.driver.exception.ResourceNotFoundException;
+import com.ridex.driver.exception.TripStateException;
 import com.ridex.driver.repository.DriverRepository;
 import com.ridex.driver.repository.ProcessedEventRepository;
 import com.ridex.driver.service.DriverReservationService;
@@ -38,7 +40,7 @@ public class DriverTripServiceImpl implements DriverTripService {
         public void acceptTrip(UUID userId, UUID tripId) {
 
                 Driver driver = driverRepository.findByUserId(userId)
-                                .orElseThrow(() -> new IllegalArgumentException(
+                                .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Driver not found"));
 
                 reservationService.acceptReservation(
@@ -50,7 +52,7 @@ public class DriverTripServiceImpl implements DriverTripService {
         public void rejectTrip(UUID userId, UUID tripId) {
 
                 Driver driver = driverRepository.findByUserId(userId)
-                                .orElseThrow(() -> new IllegalArgumentException(
+                                .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Driver not found"));
 
                 reservationService.releaseReservation(
@@ -63,23 +65,23 @@ public class DriverTripServiceImpl implements DriverTripService {
         public void arriveAtPickup(UUID userId, UUID tripId) {
 
                 Driver driver = driverRepository.findByUserId(userId)
-                                .orElseThrow(() -> new IllegalArgumentException(
+                                .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Driver not found"));
 
                 DriverReservation reservation = reservationService.findDriverReservation(tripId);
 
                 if (!reservation.getDriverId().equals(driver.getId())) {
-                        throw new IllegalStateException(
+                        throw new TripStateException(
                                         "Driver does not own this trip");
                 }
 
                 if (reservation.getStatus() != ReservationStatus.ACCEPTED) {
-                        throw new IllegalStateException(
+                        throw new TripStateException(
                                         "Trip has not been accepted");
                 }
 
                 if (driver.getStatus() != DriverStatus.ON_TRIP) {
-                        throw new IllegalStateException(
+                        throw new TripStateException(
                                         "Driver is not currently on a trip");
                 }
 
@@ -99,23 +101,23 @@ public class DriverTripServiceImpl implements DriverTripService {
         public void startTrip(UUID userId, UUID tripId) {
 
                 Driver driver = driverRepository.findByUserId(userId)
-                                .orElseThrow(() -> new IllegalArgumentException(
+                                .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Driver not found"));
 
                 DriverReservation reservation = reservationService.findDriverReservation(tripId);
 
                 if (!reservation.getDriverId().equals(driver.getId())) {
-                        throw new IllegalStateException(
+                        throw new TripStateException(
                                         "Driver does not own this trip");
                 }
 
                 if (reservation.getStatus() != ReservationStatus.ACCEPTED) {
-                        throw new IllegalStateException(
+                        throw new TripStateException(
                                         "Trip has not been accepted");
                 }
 
                 if (driver.getStatus() != DriverStatus.ON_TRIP) {
-                        throw new IllegalStateException(
+                        throw new TripStateException(
                                         "Driver is not on a trip");
                 }
 
@@ -134,23 +136,23 @@ public class DriverTripServiceImpl implements DriverTripService {
         public void completeTrip(UUID userId, UUID tripId) {
 
                 Driver driver = driverRepository.findByUserId(userId)
-                                .orElseThrow(() -> new IllegalArgumentException(
+                                .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Driver not found"));
 
                 DriverReservation reservation = reservationService.findDriverReservation(tripId);
 
                 if (!reservation.getDriverId().equals(driver.getId())) {
-                        throw new IllegalStateException(
+                        throw new TripStateException(
                                         "Driver does not own this trip");
                 }
 
                 if (reservation.getStatus() != ReservationStatus.ACCEPTED) {
-                        throw new IllegalStateException(
+                        throw new TripStateException(
                                         "Trip has not been accepted");
                 }
 
                 if (driver.getStatus() != DriverStatus.ON_TRIP) {
-                        throw new IllegalStateException(
+                        throw new TripStateException(
                                         "Driver is not on a trip");
                 }
 
@@ -174,7 +176,7 @@ public class DriverTripServiceImpl implements DriverTripService {
                 }
 
                 Driver driver = driverRepository.findById(event.driverId())
-                                .orElseThrow(() -> new IllegalArgumentException(
+                                .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Driver not found"));
 
                 if (driver.getStatus() != DriverStatus.ON_TRIP) {

@@ -8,11 +8,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ridex.driver.dto.request.DriverOnboardingRequest;
 import com.ridex.driver.entity.Driver;
 import com.ridex.driver.entity.Vehicle;
+import com.ridex.driver.exception.ResourceAlreadyExistsException;
+import com.ridex.driver.exception.ResourceNotFoundException;
 import com.ridex.driver.repository.DriverRepository;
 import com.ridex.driver.repository.VehicleRepository;
 import com.ridex.driver.service.DriverOnboardingService;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -31,13 +32,13 @@ public class DriverOnboardingServiceImpl implements DriverOnboardingService {
 
         Driver driver = driverRepository.findById(driverId)
                 .orElseThrow(() ->
-                        new EntityNotFoundException(
+                        new ResourceNotFoundException(
                                 "Driver not found: " + driverId
                         )
                 );
 
         if (driver.getLicenseNumber() != null) {
-            throw new IllegalStateException(
+            throw new ResourceAlreadyExistsException(
                     "Driver onboarding is already completed"
             );
         }
@@ -45,7 +46,7 @@ public class DriverOnboardingServiceImpl implements DriverOnboardingService {
         if (vehicleRepository.existsByRegistrationNumber(
                 request.vehicle().registrationNumber())) {
 
-            throw new IllegalStateException(
+            throw new ResourceAlreadyExistsException(
                     "Vehicle registration number already exists"
             );
         }

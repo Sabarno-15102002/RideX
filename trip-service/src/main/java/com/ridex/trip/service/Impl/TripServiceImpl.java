@@ -23,6 +23,8 @@ import com.ridex.trip.event.event.DriverTripStartedEvent;
 import com.ridex.trip.event.event.TripCompletedEvent;
 import com.ridex.trip.event.event.TripRematchingEvent;
 import com.ridex.trip.event.event.TripRequestedEvent;
+import com.ridex.trip.exception.IllegalOperationException;
+import com.ridex.trip.exception.ResourceNotFoundException;
 import com.ridex.trip.repository.ProcessedEventRepository;
 import com.ridex.trip.repository.RiderIdentityRepository;
 import com.ridex.trip.repository.TripPaymentRepository;
@@ -50,7 +52,7 @@ public class TripServiceImpl implements TripService {
                         UUID userId,
                         CreateTripRequest request) {
                 RiderIdentity riderIdentity = riderIdentityRepository.findById(userId)
-                                .orElseThrow(() -> new IllegalStateException(
+                                .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Rider profile not found"));
 
                 Instant now = Instant.now();
@@ -120,7 +122,7 @@ public class TripServiceImpl implements TripService {
                 }
 
                 Trip trip = tripRepository.findById(event.tripId())
-                                .orElseThrow(() -> new IllegalStateException(
+                                .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Trip not found: " + event.tripId()));
 
                 if (trip.getStatus() != TripStatus.MATCHING
@@ -150,7 +152,7 @@ public class TripServiceImpl implements TripService {
                 }
 
                 Trip trip = tripRepository.findById(event.tripId())
-                                .orElseThrow(() -> new IllegalArgumentException(
+                                .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Trip not found: " + event.tripId()));
 
                 if (trip.getStatus() != TripStatus.DRIVER_ASSIGNED) {
@@ -158,7 +160,7 @@ public class TripServiceImpl implements TripService {
                 }
 
                 if (!event.driverId().equals(trip.getDriverId())) {
-                        throw new IllegalStateException(
+                        throw new IllegalOperationException(
                                         "Accepted driver does not match assigned driver");
                 }
 
@@ -182,7 +184,7 @@ public class TripServiceImpl implements TripService {
                 }
 
                 Trip trip = tripRepository.findById(event.tripId())
-                                .orElseThrow(() -> new IllegalArgumentException(
+                                .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Trip not found: " + event.tripId()));
 
                 // Ignore stale/duplicate business events.
@@ -192,7 +194,7 @@ public class TripServiceImpl implements TripService {
 
                 // The rejecting driver must be the driver assigned to this trip.
                 if (!event.driverId().equals(trip.getDriverId())) {
-                        throw new IllegalStateException(
+                        throw new IllegalOperationException(
                                         "Rejected driver does not match assigned driver");
                 }
 
@@ -230,13 +232,13 @@ public class TripServiceImpl implements TripService {
                 }
 
                 Trip trip = tripRepository.findById(event.tripId())
-                                .orElseThrow(() -> new IllegalArgumentException(
+                                .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Trip not found: " + event.tripId()));
 
                 // The reservation that expired must belong to
                 // the driver currently assigned to this trip.
                 if (!event.driverId().equals(trip.getDriverId())) {
-                        throw new IllegalStateException(
+                        throw new IllegalOperationException(
                                         "Expired driver does not match assigned driver");
                 }
 
@@ -281,7 +283,7 @@ public class TripServiceImpl implements TripService {
                 }
 
                 Trip trip = tripRepository.findById(event.tripId())
-                                .orElseThrow(() -> new IllegalArgumentException(
+                                .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Trip not found: " + event.tripId()));
 
                 if (trip.getStatus() != TripStatus.DRIVER_ARRIVING) {
@@ -289,7 +291,7 @@ public class TripServiceImpl implements TripService {
                 }
 
                 if (!event.driverId().equals(trip.getDriverId())) {
-                        throw new IllegalStateException(
+                        throw new IllegalOperationException(
                                         "Arriving driver does not match assigned driver");
                 }
 
@@ -315,7 +317,7 @@ public class TripServiceImpl implements TripService {
                 }
 
                 Trip trip = tripRepository.findById(event.tripId())
-                                .orElseThrow(() -> new IllegalArgumentException(
+                                .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Trip not found: " + event.tripId()));
 
                 if (trip.getStatus() != TripStatus.DRIVER_ARRIVED) {
@@ -323,7 +325,7 @@ public class TripServiceImpl implements TripService {
                 }
 
                 if (!event.driverId().equals(trip.getDriverId())) {
-                        throw new IllegalStateException(
+                        throw new IllegalOperationException(
                                         "Starting driver does not match assigned driver");
                 }
 
@@ -351,7 +353,7 @@ public class TripServiceImpl implements TripService {
                 }
 
                 Trip trip = tripRepository.findById(event.tripId())
-                                .orElseThrow(() -> new IllegalArgumentException(
+                                .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Trip not found: " + event.tripId()));
 
                 if (trip.getStatus() != TripStatus.TRIP_STARTED) {
@@ -359,7 +361,7 @@ public class TripServiceImpl implements TripService {
                 }
 
                 if (!event.driverId().equals(trip.getDriverId())) {
-                        throw new IllegalStateException(
+                        throw new IllegalOperationException(
                                         "Completing driver does not match assigned driver");
                 }
 
@@ -398,7 +400,7 @@ public class TripServiceImpl implements TripService {
         @Override
         public TripStatus geTripStatus(UUID tripId) {
                 Trip trip = tripRepository.findById(tripId)
-                                .orElseThrow(() -> new IllegalArgumentException(
+                                .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Trip not found: " + tripId));
 
                 return trip.getStatus();

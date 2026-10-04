@@ -15,6 +15,7 @@ import com.ridex.driver.entity.DriverReservation;
 import com.ridex.driver.event.DriverRideAcceptedEvent;
 import com.ridex.driver.event.DriverRideExpiredEvent;
 import com.ridex.driver.event.DriverRideRejectedEvent;
+import com.ridex.driver.exception.ResourceNotFoundException;
 import com.ridex.driver.repository.DriverRepository;
 import com.ridex.driver.repository.DriverReservationRepository;
 import com.ridex.driver.service.DriverReservationService;
@@ -43,7 +44,7 @@ public class DriverReservationServiceImpl implements DriverReservationService {
                         UUID tripId) {
 
                 Driver driver = driverRepository.findById(driverId)
-                                .orElseThrow(() -> new IllegalStateException(
+                                .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Driver not found: " + driverId));
 
                 if (driver.getStatus() != DriverStatus.AVAILABLE) {
@@ -103,18 +104,18 @@ public class DriverReservationServiceImpl implements DriverReservationService {
 
                 DriverReservation reservation = reservationRepository
                                 .findByTripIdForUpdate(tripId)
-                                .orElseThrow(() -> new IllegalArgumentException(
+                                .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Reservation not found"));
 
                 // 1. Verify ownership
                 if (!reservation.getDriverId().equals(driverId)) {
-                        throw new IllegalStateException(
+                        throw new ResourceNotFoundException(
                                         "Driver does not own this reservation");
                 }
 
                 // 2. Verify reservation state
                 if (reservation.getStatus() != ReservationStatus.ACTIVE) {
-                        throw new IllegalStateException(
+                        throw new ResourceNotFoundException(
                                         "Reservation is not active");
                 }
 
@@ -127,18 +128,18 @@ public class DriverReservationServiceImpl implements DriverReservationService {
 
                         reservationRepository.save(reservation);
 
-                        throw new IllegalStateException(
+                        throw new ResourceNotFoundException(
                                         "Reservation has expired");
                 }
 
                 // 4. Load driver
                 Driver driver = driverRepository.findById(driverId)
-                                .orElseThrow(() -> new IllegalArgumentException(
+                                .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Driver not found"));
 
                 // 5. Verify driver is still AVAILABLE
                 if (driver.getStatus() != DriverStatus.AVAILABLE) {
-                        throw new IllegalStateException(
+                        throw new ResourceNotFoundException(
                                         "Driver is no longer available");
                 }
 
@@ -169,11 +170,11 @@ public class DriverReservationServiceImpl implements DriverReservationService {
 
                 DriverReservation reservation = reservationRepository
                                 .findByTripIdForUpdate(tripId)
-                                .orElseThrow(() -> new IllegalArgumentException(
+                                .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Reservation not found"));
 
                 if (!reservation.getDriverId().equals(driverId)) {
-                        throw new IllegalStateException(
+                        throw new ResourceNotFoundException(
                                         "Driver does not own this reservation");
                 }
 
@@ -236,7 +237,7 @@ public class DriverReservationServiceImpl implements DriverReservationService {
         public DriverReservation findDriverReservation(UUID tripId) {
                 return reservationRepository
                                 .findByTripIdForUpdate(tripId)
-                                .orElseThrow(() -> new IllegalArgumentException(
+                                .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Reservation not found"));
         }
 }

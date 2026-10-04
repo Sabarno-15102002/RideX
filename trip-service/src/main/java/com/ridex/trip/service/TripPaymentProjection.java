@@ -8,6 +8,8 @@ import com.ridex.trip.entity.TripPayment;
 import com.ridex.trip.event.event.PaymentFailedEvent;
 import com.ridex.trip.event.event.PaymentRefundedEvent;
 import com.ridex.trip.event.event.PaymentSucceededEvent;
+import com.ridex.trip.exception.IllegalOperationException;
+import com.ridex.trip.exception.ResourceNotFoundException;
 import com.ridex.trip.repository.TripPaymentRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -67,7 +69,7 @@ public class TripPaymentProjection {
     public void project(PaymentRefundedEvent event) {
         TripPayment payment = tripPaymentRepository.findById(event.tripId())
                 .orElseThrow(() ->
-                        new IllegalStateException(
+                        new ResourceNotFoundException(
                                 "Payment projection not found for trip: "
                                         + event.tripId()
                         )
@@ -78,7 +80,7 @@ public class TripPaymentProjection {
         }
 
         if (payment.getStatus() != PaymentStatus.SUCCESS) {
-            throw new IllegalStateException(
+            throw new IllegalOperationException(
                     "Cannot refund payment in status: "
                             + payment.getStatus()
             );

@@ -19,6 +19,9 @@ import com.ridex.location.dto.request.DriverLocationUpdate;
 import com.ridex.location.dto.response.NearbyDriverResponse;
 import com.ridex.location.event.DriverStatusChangedEvent;
 import com.ridex.location.event.TripCompletedEvent;
+import com.ridex.location.exception.IllegalOperationException;
+import com.ridex.location.exception.InvalidCredentialsException;
+import com.ridex.location.exception.ResourceNotFoundException;
 import com.ridex.location.service.DriverLocationService;
 
 import lombok.RequiredArgsConstructor;
@@ -48,7 +51,7 @@ public class DriverLocationServiceImpl implements DriverLocationService {
                                                 userId.toString());
 
                 if (driverIdValue == null) {
-                        throw new IllegalArgumentException("Driver profile not found for authenticated user");
+                        throw new InvalidCredentialsException("Driver profile not found for authenticated user");
                 }
 
                 UUID driverId = UUID.fromString(driverIdValue.toString());
@@ -58,7 +61,7 @@ public class DriverLocationServiceImpl implements DriverLocationService {
                 if (!"AVAILABLE".equals(status)
                                 && !"ON_TRIP".equals(status)) {
 
-                        throw new IllegalStateException(
+                        throw new IllegalOperationException(
                                         "Driver is not allowed to update location in status: "
                                                         + status);
                 }
@@ -191,7 +194,7 @@ public class DriverLocationServiceImpl implements DriverLocationService {
                                                 driverId.toString());
 
                 if (status == null) {
-                        throw new IllegalStateException(
+                        throw new ResourceNotFoundException(
                                         "Driver status not available");
                 }
 
