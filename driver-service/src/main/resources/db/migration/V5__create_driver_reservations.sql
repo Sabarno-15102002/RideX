@@ -17,3 +17,7 @@ CREATE INDEX idx_driver_reservations_expires_at
 CREATE UNIQUE INDEX uk_active_driver_reservation
     ON driver_reservations(driver_id)
     WHERE status = 'ACTIVE';
+
+CREATE UNIQUE INDEX uk_active_trip_reservation
+    ON driver_reservations(trip_id)
+    WHERE status = 'ACTIVE';

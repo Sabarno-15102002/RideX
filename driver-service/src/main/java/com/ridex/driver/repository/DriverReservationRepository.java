@@ -18,27 +18,31 @@ import jakarta.persistence.LockModeType;
 
 public interface DriverReservationRepository extends JpaRepository<DriverReservation, UUID> {
 
-    boolean existsByDriverIdAndStatus(UUID driverId, ReservationStatus status);
+  boolean existsByDriverIdAndStatus(UUID driverId, ReservationStatus status);
 
-    Optional<DriverReservation> findByTripId(UUID tripId);
+  Optional<DriverReservation> findByTripIdAndStatus(
+      UUID tripId,
+      ReservationStatus status);
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("""
-                SELECT r
-                FROM DriverReservation r
-                WHERE r.tripId = :tripId
-            """)
-    Optional<DriverReservation> findByTripIdForUpdate(@Param("tripId") UUID tripId);
+  Optional<DriverReservation> findByTripId(UUID tripId);
 
-    @Query("""
-                SELECT r
-                FROM DriverReservation r
-                WHERE r.status = :status
-                  AND r.expiresAt <= :now
-                ORDER BY r.expiresAt ASC
-            """)
-    List<DriverReservation> findExpiredReservations(
-            @Param("status") ReservationStatus status,
-            @Param("now") Instant now,
-            Pageable pageable);
+  @Lock(LockModeType.PESSIMISTIC_WRITE)
+  @Query("""
+          SELECT r
+          FROM DriverReservation r
+          WHERE r.tripId = :tripId
+      """)
+  Optional<DriverReservation> findByTripIdForUpdate(@Param("tripId") UUID tripId);
+
+  @Query("""
+          SELECT r
+          FROM DriverReservation r
+          WHERE r.status = :status
+            AND r.expiresAt <= :now
+          ORDER BY r.expiresAt ASC
+      """)
+  List<DriverReservation> findExpiredReservations(
+      @Param("status") ReservationStatus status,
+      @Param("now") Instant now,
+      Pageable pageable);
 }

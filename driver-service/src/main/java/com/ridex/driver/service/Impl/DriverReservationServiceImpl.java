@@ -51,7 +51,7 @@ public class DriverReservationServiceImpl implements DriverReservationService {
                         return false;
                 }
 
-                Optional<DriverReservation> existingReservation = reservationRepository.findByTripId(tripId);
+                Optional<DriverReservation> existingReservation = reservationRepository.findByTripIdAndStatus(tripId, ReservationStatus.ACTIVE);
 
                 if (existingReservation.isPresent()) {
 
