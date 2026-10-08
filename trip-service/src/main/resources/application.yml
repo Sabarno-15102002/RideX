@@ -30,13 +30,23 @@ spring:
                 spring.json.trusted.packages: "com.ridex.trip.event"
 
 jwt:
-  secret: ${JWT_SECRET:change-this-secret-key-to-a-long-random-value}
-  expiration-ms: ${JWT_EXPIRATION_MS:900000}
-  
+    secret: ${JWT_SECRET:change-this-secret-key-to-a-long-random-value}
+    expiration-ms: ${JWT_EXPIRATION_MS:900000}
+
 server:
-  port: ${TRIP_SERVICE_PORT:8085}
+    port: ${TRIP_SERVICE_PORT:8085}
 
 ridex:
-  services:
-    pricing:
-      base-url: http://localhost:8087
+    services:
+        pricing:
+            base-url: http://localhost:8087
+
+management:
+    endpoints:
+        web:
+            exposure:
+                include: "*"
+    metrics:
+        distribution:
+            percentiles-histogram:
+                http.server.requests: true

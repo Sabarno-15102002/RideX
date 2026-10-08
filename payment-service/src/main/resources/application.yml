@@ -37,6 +37,10 @@ management:
         web:
             exposure:
                 include: "*"
+    metrics:
+        distribution:
+            percentiles-histogram:
+                http.server.requests: true
 
 jwt:
     secret: ${JWT_SECRET:change-this-secret-key-to-a-long-random-value}
@@ -52,13 +56,13 @@ ridex:
         provider: mock
 
 resilience4j:
-  retry:
-    instances:
-      pricingService:
-        max-attempts: 3
-        wait-duration: 500ms
-        enable-exponential-backoff: true
-        exponential-backoff-multiplier: 2
-        retry-exceptions:
-          - com.ridex.payment.client.PricingServiceUnavailableException
-          - org.springframework.web.client.ResourceAccessException
+    retry:
+        instances:
+            pricingService:
+                max-attempts: 3
+                wait-duration: 500ms
+                enable-exponential-backoff: true
+                exponential-backoff-multiplier: 2
+                retry-exceptions:
+                    - com.ridex.payment.client.PricingServiceUnavailableException
+                    - org.springframework.web.client.ResourceAccessException

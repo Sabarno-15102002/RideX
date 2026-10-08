@@ -423,6 +423,7 @@ echo "Rider JWT acquired."
 # 9. Create TRIP
 # ============================================================
 
+sleep 1 # To ensure driver is available before creating trip
 print_section "9. Creating TRIP"
 
 TRIP_BODY="{

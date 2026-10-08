@@ -2,18 +2,17 @@
 
 set -e
 
-KAFKA_CONTAINER="${KAFKA_CONTAINER:-ridex-kafka}"
+KAFKA_BOOTSTRAP_SERVER="${KAFKA_BOOTSTRAP_SERVER:-kafka:9092}"
 
 create_topic() {
     local topic=$1
     local partitions=$2
 
-    docker exec "$KAFKA_CONTAINER" \
-        /opt/kafka/bin/kafka-topics.sh \
+    /opt/kafka/bin/kafka-topics.sh \
         --create \
         --if-not-exists \
         --topic "$topic" \
-        --bootstrap-server localhost:9092 \
+        --bootstrap-server "$KAFKA_BOOTSTRAP_SERVER" \
         --partitions "$partitions" \
         --replication-factor 1
 
