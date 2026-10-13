@@ -1,0 +1,61 @@
+discovery.docker "ridex" {
+  host             = "unix:///var/run/docker.sock"
+  refresh_interval = "5s"
+}
+
+discovery.relabel "ridex" {
+  targets = discovery.docker.ridex.targets
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "container"
+    replacement   = "$1"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
+    regex         = "(.*)"
+    target_label  = "service"
+    replacement   = "$1"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_log_stream"]
+    target_label  = "stream"
+  }
+}
+
+loki.source.docker "ridex" {
+  host             = "unix:///var/run/docker.sock"
+  targets          = discovery.docker.ridex.targets
+  relabel_rules    = discovery.relabel.ridex.rules
+  refresh_interval = "5s"
+
+  forward_to = [loki.process.ridex.receiver]
+}
+
+loki.process "ridex" {
+  forward_to = [loki.write.local.receiver]
+
+  stage.regex {
+    expression = `(?i)(?P<level>trace|debug|info|warn|error)`
+  }
+
+  stage.template {
+    source   = "level"
+    template = `{{ ToLower .Value }}`
+  }
+
+  stage.labels {
+    values = {
+      level = "",
+    }
+  }
+}
+
+loki.write "local" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}

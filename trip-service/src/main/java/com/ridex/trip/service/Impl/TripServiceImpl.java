@@ -1,11 +1,13 @@
 package com.ridex.trip.service.Impl;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ridex.trip.config.TripMetrics;
 import com.ridex.trip.dto.PaymentSummary;
 import com.ridex.trip.dto.TripStatus;
 import com.ridex.trip.dto.request.CreateTripRequest;
@@ -45,6 +47,7 @@ public class TripServiceImpl implements TripService {
         private final OutboxEventService outboxEventService;
         private final ProcessedEventRepository processedEventRepository;
         private final TripPaymentRepository tripPaymentRepository;
+        private final TripMetrics tripMetrics;
 
         @Override
         @Transactional
@@ -84,6 +87,7 @@ public class TripServiceImpl implements TripService {
                                 now);
 
                 outboxEventService.saveTripRequestedEvent(event);
+                tripMetrics.tripRequested();
 
                 return toResponse(savedTrip);
         }
@@ -394,6 +398,8 @@ public class TripServiceImpl implements TripService {
                                 event.completedAt());
 
                 outboxEventService.saveTripCompletedEvent(tripCompletedEvent);
+                tripMetrics.tripCompleted(
+                                Duration.between(trip.getStartedAt(), event.completedAt()));
 
         }
 

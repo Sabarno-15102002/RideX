@@ -50,3 +50,7 @@ ridex:
     base-fare: 50.00
     per-km: 15.00
     per-minute: 2.00
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [correlationId=%X{correlationId}] %logger{36} - %msg%n"

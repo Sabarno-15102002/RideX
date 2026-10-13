@@ -50,3 +50,7 @@ ridex:
       base-url: ${LOCATION_SERVICE_URL:http://localhost:8084}
     driver:
       base-url: ${DRIVER_SERVICE_URL:http://localhost:8083}
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [correlationId=%X{correlationId}] %logger{36} - %msg%n"

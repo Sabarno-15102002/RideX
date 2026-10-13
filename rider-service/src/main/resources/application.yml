@@ -45,3 +45,7 @@ management:
 jwt:
   secret: ${JWT_SECRET:change-this-secret-key-to-a-long-random-value}
   expiration-ms: ${JWT_EXPIRATION_MS:900000}
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [correlationId=%X{correlationId}] %logger{36} - %msg%n"

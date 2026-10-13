@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ridex.payment.config.PaymentMetrics;
 import com.ridex.payment.config.SecurityUtils;
 import com.ridex.payment.dto.PaymentAttemptStatus;
 import com.ridex.payment.dto.PaymentMethod;
@@ -43,6 +44,7 @@ public class PaymentServiceImpl implements PaymentService {
         private final PaymentProviderFactory paymentProviderFactory;
         private final PaymentAttemptRepository paymentAttemptRepository;
         private final OutboxEventService outboxEventService;
+        private final PaymentMetrics paymentMetrics;
 
         @Override
         @Transactional
@@ -100,7 +102,8 @@ public class PaymentServiceImpl implements PaymentService {
                                 payment.getCurrency(),
                                 Instant.now()
                         );
-
+                        paymentMetrics.recordPaymentRefunded();
+                        paymentMetrics.recordPaymentProcessingDuration(Instant.now().toEpochMilli() - payment.getCreatedAt().toEpochMilli());
                         outboxEventService.savePaymentRefundedEvent(event);
                 } else {
                         throw new PaymentProviderException(
@@ -137,7 +140,8 @@ public class PaymentServiceImpl implements PaymentService {
                                 payment.getCurrency(),
                                 Instant.now()
                         );
-
+                        paymentMetrics.recordPaymentSucceeded();
+                        paymentMetrics.recordPaymentProcessingDuration(Instant.now().toEpochMilli() - payment.getCreatedAt().toEpochMilli());
                         outboxEventService.savePaymentSucceededEvent(event);
                 } else {
                         payment.setStatus(PaymentStatus.FAILED);
@@ -151,7 +155,8 @@ public class PaymentServiceImpl implements PaymentService {
                                 payment.getCurrency(),
                                 Instant.now()
                         );
-
+                        paymentMetrics.recordPaymentFailed();
+                        paymentMetrics.recordPaymentProcessingDuration(Instant.now().toEpochMilli() - payment.getCreatedAt().toEpochMilli());
                         outboxEventService.savePaymentFailedEvent(event);
                 }
 
@@ -264,6 +269,8 @@ public class PaymentServiceImpl implements PaymentService {
                         attempt.setUpdatedAt(Instant.now());
 
                         paymentAttemptRepository.save(attempt);
+                        paymentMetrics.recordPaymentFailed();
+                        paymentMetrics.recordPaymentProcessingDuration(Instant.now().toEpochMilli() - payment.getCreatedAt().toEpochMilli());
 
                         throw new PaymentProviderException(
                                         result.failureReason());

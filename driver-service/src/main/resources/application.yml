@@ -48,3 +48,7 @@ jwt:
 ridex:
   driver:
     reservation-expiry-interval-ms: 5000
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [correlationId=%X{correlationId}] %logger{36} - %msg%n"

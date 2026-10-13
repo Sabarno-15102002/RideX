@@ -45,3 +45,7 @@ jwt:
 
 refresh-token:
   expiration-ms: ${REFRESH_TOKEN_EXPIRATION_MS:2592000000}
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [correlationId=%X{correlationId}] %logger{36} - %msg%n"

@@ -66,3 +66,7 @@ resilience4j:
                 retry-exceptions:
                     - com.ridex.payment.client.PricingServiceUnavailableException
                     - org.springframework.web.client.ResourceAccessException
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [correlationId=%X{correlationId}] %logger{36} - %msg%n"

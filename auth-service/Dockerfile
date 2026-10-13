@@ -7,20 +7,45 @@ FROM eclipse-temurin:21-jdk AS build
 
 WORKDIR /workspace
 
-COPY .mvn/ .mvn/
-COPY mvnw pom.xml ./
+# =========================
+# Shared RideX observability library
+# =========================
+COPY libs/ridex-observability/.mvn/ libs/ridex-observability/.mvn/
+COPY libs/ridex-observability/mvnw libs/ridex-observability/
+COPY libs/ridex-observability/pom.xml libs/ridex-observability/
 
-RUN chmod +x mvnw
+RUN chmod +x libs/ridex-observability/mvnw
 
-# Cache Maven dependencies
+COPY libs/ridex-observability/src/ libs/ridex-observability/src/
+
 RUN --mount=type=cache,target=/root/.m2 \
-    ./mvnw dependency:go-offline -B
+    ./libs/ridex-observability/mvnw \
+    -f libs/ridex-observability/pom.xml \
+    clean install -DskipTests -B
 
-COPY src/ src/
+# =========================
+# Auth Service Maven project
+# =========================
+COPY auth-service/.mvn/ auth-service/.mvn/
+COPY auth-service/mvnw auth-service/
+COPY auth-service/pom.xml auth-service/
 
+RUN chmod +x auth-service/mvnw
+
+# Cache Auth Service dependencies
 RUN --mount=type=cache,target=/root/.m2 \
-    ./mvnw clean package -DskipTests -B
+    ./auth-service/mvnw \
+    -f auth-service/pom.xml \
+    dependency:go-offline -B
 
+# Copy Auth Service source
+COPY auth-service/src/ auth-service/src/
+
+# Build Auth Service
+RUN --mount=type=cache,target=/root/.m2 \
+    ./auth-service/mvnw \
+    -f auth-service/pom.xml \
+    clean package -DskipTests -B
 
 # =========================
 # Runtime stage
@@ -35,7 +60,7 @@ RUN useradd \
     --create-home \
     ridex
 
-COPY --from=build /workspace/target/*.jar app.jar
+COPY --from=build /workspace/auth-service/target/*.jar app.jar
 
 RUN chown -R ridex:ridex /app
 

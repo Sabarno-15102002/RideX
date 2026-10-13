@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ridex.matching.client.DriverServiceClient;
 import com.ridex.matching.client.LocationServiceClient;
+import com.ridex.matching.config.MatchingMetrics;
 import com.ridex.matching.dto.response.NearbyDriverResponse;
 import com.ridex.matching.entity.ProcessedEvent;
 import com.ridex.matching.event.DriverMatchRequestedEvent;
@@ -32,10 +33,13 @@ public class MatchingServiceImpl implements MatchingService {
         private final DriverServiceClient driverServiceClient;
         private final ProcessedEventRepository processedEventRepository;
         private final OutboxEventService outboxEventService;
+        private final MatchingMetrics matchingMetrics;
 
         @Override
         @Transactional 
         public void matchTrip(TripRequestedEvent tripEvent) {
+
+                Instant matchingStartTime = Instant.now();
 
                 List<NearbyDriverResponse> drivers = locationServiceClient.findNearbyDrivers(
                                 tripEvent.pickupLatitude(),
@@ -57,6 +61,14 @@ public class MatchingServiceImpl implements MatchingService {
                         boolean reserved = driverServiceClient.reserveDriver(
                                         candidate.driverId(),
                                         tripEvent.tripId());
+                        
+                        if(reserved) {
+                                matchingMetrics.recordMatchingSuccess();
+                                matchingMetrics.recordMatchingDuration(
+                                                Instant.now().toEpochMilli() - matchingStartTime.toEpochMilli());
+                        } else {
+                                matchingMetrics.recordMatchingFailure();
+                        }
 
                         if (!reserved) {
                                 log.info("Not reserved... checking next driver");
@@ -70,6 +82,7 @@ public class MatchingServiceImpl implements MatchingService {
                                         Instant.now());
 
                         outboxEventService.saveDriverMatchRequestedEvent(matchEvent);
+                        matchingMetrics.recordMatchingAttempt();
 
                         return;
                 }
@@ -105,6 +118,7 @@ public class MatchingServiceImpl implements MatchingService {
                                 );
 
                         outboxEventService.saveDriverMatchRequestedEvent(matchEvent);
+                        matchingMetrics.recordMatchingAttempt();
 
                         return;
                 }

@@ -7,20 +7,45 @@ FROM eclipse-temurin:21-jdk AS build
 
 WORKDIR /workspace
 
-COPY .mvn/ .mvn/
-COPY mvnw pom.xml ./
+# =========================
+# Shared RideX observability library
+# =========================
+COPY libs/ridex-observability/.mvn/ libs/ridex-observability/.mvn/
+COPY libs/ridex-observability/mvnw libs/ridex-observability/
+COPY libs/ridex-observability/pom.xml libs/ridex-observability/
 
-RUN chmod +x mvnw
+RUN chmod +x libs/ridex-observability/mvnw
 
-# Cache Maven dependencies
+COPY libs/ridex-observability/src/ libs/ridex-observability/src/
+
 RUN --mount=type=cache,target=/root/.m2 \
-    ./mvnw dependency:go-offline -B
+    ./libs/ridex-observability/mvnw \
+    -f libs/ridex-observability/pom.xml \
+    clean install -DskipTests -B
 
-COPY src/ src/
+# =========================
+# Pricing Service Maven project
+# =========================
+COPY pricing-service/.mvn/ pricing-service/.mvn/
+COPY pricing-service/mvnw pricing-service/
+COPY pricing-service/pom.xml pricing-service/
 
+RUN chmod +x pricing-service/mvnw
+
+# Cache Pricing Service dependencies
 RUN --mount=type=cache,target=/root/.m2 \
-    ./mvnw clean package -DskipTests -B
+    ./pricing-service/mvnw \
+    -f pricing-service/pom.xml \
+    dependency:go-offline -B
 
+# Copy Pricing Service source
+COPY pricing-service/src/ pricing-service/src/
+
+# Build Pricing Service
+RUN --mount=type=cache,target=/root/.m2 \
+    ./pricing-service/mvnw \
+    -f pricing-service/pom.xml \
+    clean package -DskipTests -B
 
 # =========================
 # Runtime stage
@@ -35,7 +60,7 @@ RUN useradd \
     --create-home \
     ridex
 
-COPY --from=build /workspace/target/*.jar app.jar
+COPY --from=build /workspace/pricing-service/target/*.jar app.jar
 
 RUN chown -R ridex:ridex /app
 

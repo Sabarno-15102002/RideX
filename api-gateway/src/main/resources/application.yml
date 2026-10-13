@@ -72,3 +72,5 @@ management:
 logging:
   level:
     org.springframework.cloud.gateway.handler.RoutePredicateHandlerMapping: TRACE
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [correlationId=%X{correlationId}] %logger{36} - %msg%n"

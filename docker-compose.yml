@@ -8,7 +8,9 @@ services:
       SPRING_PROFILES_ACTIVE: docker
 
   auth-service:
-    build: ./auth-service
+    build:
+      context: .
+      dockerfile: auth-service/Dockerfile
     environment:
       SPRING_PROFILES_ACTIVE: docker
       EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
@@ -21,7 +23,9 @@ services:
         condition: service_healthy
 
   rider-service:
-    build: ./rider-service
+    build:
+      context: .
+      dockerfile: rider-service/Dockerfile
     environment:
       SPRING_PROFILES_ACTIVE: docker
       EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
@@ -34,7 +38,9 @@ services:
         condition: service_healthy
 
   driver-service:
-    build: ./driver-service
+    build:
+      context: .
+      dockerfile: driver-service/Dockerfile
     environment:
       SPRING_PROFILES_ACTIVE: docker
       EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
@@ -47,7 +53,9 @@ services:
         condition: service_healthy
 
   location-service:
-    build: ./location-service
+    build:
+      context: .
+      dockerfile: location-service/Dockerfile
     environment:
       SPRING_PROFILES_ACTIVE: docker
       EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
@@ -60,7 +68,9 @@ services:
         condition: service_healthy
 
   trip-service:
-    build: ./trip-service
+    build:
+      context: .
+      dockerfile: trip-service/Dockerfile
     environment:
       SPRING_PROFILES_ACTIVE: docker
       EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
@@ -73,7 +83,9 @@ services:
         condition: service_healthy
 
   matching-service:
-    build: ./matching-service
+    build:
+      context: .
+      dockerfile: matching-service/Dockerfile
     environment:
       SPRING_PROFILES_ACTIVE: docker
       EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
@@ -90,7 +102,9 @@ services:
         condition: service_healthy
 
   pricing-service:
-    build: ./pricing-service
+    build:
+      context: .
+      dockerfile: pricing-service/Dockerfile
     environment:
       SPRING_PROFILES_ACTIVE: docker
       EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
@@ -103,7 +117,9 @@ services:
         condition: service_healthy
 
   payment-service:
-    build: ./payment-service
+    build:
+      context: .
+      dockerfile: payment-service/Dockerfile
     environment:
       SPRING_PROFILES_ACTIVE: docker
       EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
@@ -376,6 +392,37 @@ services:
     depends_on:
       - prometheus
     restart: unless-stopped
+  
+
+  # =========================
+  # Loki
+  # =========================
+
+  loki:
+    image: grafana/loki:latest
+    container_name: ridex-loki
+    volumes:
+      - ./infrastructure/loki/loki-config.yml:/etc/loki/config.yml:ro
+      - loki_data:/loki
+    command:
+      - "-config.file=/etc/loki/config.yml"
+    restart: unless-stopped
+
+  alloy:
+    image: grafana/alloy:latest
+    container_name: ridex-alloy
+    volumes:
+      - ./infrastructure/alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - alloy_data:/var/lib/alloy/data
+    command:
+      - run
+      - --server.http.listen-addr=0.0.0.0:12345
+      - --storage.path=/var/lib/alloy/data
+      - /etc/alloy/config.alloy
+    depends_on:
+      - loki
+    restart: unless-stopped
 
 volumes:
   auth_db_data:
@@ -389,3 +436,5 @@ volumes:
   redis_data:
   prometheus_data:
   grafana_data:
+  loki_data:
+  alloy_data:

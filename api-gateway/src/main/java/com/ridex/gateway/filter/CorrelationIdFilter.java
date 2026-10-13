@@ -36,7 +36,8 @@ public class CorrelationIdFilter implements GlobalFilter, Ordered {
                                 .getHeaders()
                                 .set(CORRELATION_ID, correlationId);
 
-                return chain.filter(mutatedExchange);
+                return chain.filter(mutatedExchange)
+                                .contextWrite(context -> context.put("correlationId", correlationId));
         }
 
         @Override
