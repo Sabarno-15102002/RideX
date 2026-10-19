@@ -408,6 +408,10 @@ services:
       - "-config.file=/etc/loki/config.yml"
     restart: unless-stopped
 
+  # =========================
+  # Alloy
+  # =========================
+
   alloy:
     image: grafana/alloy:latest
     container_name: ridex-alloy
@@ -424,6 +428,18 @@ services:
       - loki
     restart: unless-stopped
 
+  tempo:
+    image: grafana/tempo:latest
+    command: [ "-config.file=/etc/tempo/tempo.yml" ]
+    volumes:
+      - ./infrastructure/tempo/tempo.yml:/etc/tempo/tempo.yml:ro
+      - tempo_data:/var/tempo
+    ports:
+      - "3200:3200"
+      - "4317:4317"
+      - "4318:4318"
+    restart: unless-stopped
+
 volumes:
   auth_db_data:
   rider_db_data:
@@ -438,3 +454,4 @@ volumes:
   grafana_data:
   loki_data:
   alloy_data:
+  tempo_data:
