@@ -21,6 +21,7 @@ import com.ridex.trip.event.event.DriverRideExpiredEvent;
 import com.ridex.trip.event.event.DriverRideRejectedEvent;
 import com.ridex.trip.event.event.DriverTripCompletedEvent;
 import com.ridex.trip.event.event.DriverTripStartedEvent;
+import com.ridex.trip.event.event.PaymentCreatedEvent;
 import com.ridex.trip.event.event.PaymentFailedEvent;
 import com.ridex.trip.event.event.PaymentRefundedEvent;
 import com.ridex.trip.event.event.PaymentSucceededEvent;
@@ -71,6 +72,11 @@ public class KafkaConsumerConfig {
                 return config;
         }
 
+        private <K, V> void enableObservation(ConcurrentKafkaListenerContainerFactory<K, V> factory) {
+
+                factory.getContainerProperties().setObservationEnabled(true);
+        }
+
         @Bean
         public ConsumerFactory<String, RiderCreatedEvent> riderCreatedConsumerFactory() {
 
@@ -114,7 +120,7 @@ public class KafkaConsumerConfig {
 
                 config.put(
                                 JsonDeserializer.VALUE_DEFAULT_TYPE,
-                                DriverRideAcceptedEvent.class);
+                                DriverRideRejectedEvent.class);
 
                 return new DefaultKafkaConsumerFactory<>(config);
         }
@@ -126,7 +132,7 @@ public class KafkaConsumerConfig {
 
                 config.put(
                                 JsonDeserializer.VALUE_DEFAULT_TYPE,
-                                DriverRideAcceptedEvent.class);
+                                DriverRideExpiredEvent.class);
 
                 return new DefaultKafkaConsumerFactory<>(config);
         }
@@ -192,6 +198,18 @@ public class KafkaConsumerConfig {
         }
 
         @Bean
+        public ConsumerFactory<String, PaymentCreatedEvent> paymentCreatedConsumerFactory() {
+
+                Map<String, Object> config = consumerProperties();
+
+                config.put(
+                                JsonDeserializer.VALUE_DEFAULT_TYPE,
+                                PaymentCreatedEvent.class);
+
+                return new DefaultKafkaConsumerFactory<>(config);
+        }
+
+        @Bean
         public ConsumerFactory<String, PaymentRefundedEvent> paymentRefundedConsumerFactory() {
 
                 Map<String, Object> config = consumerProperties();
@@ -210,6 +228,7 @@ public class KafkaConsumerConfig {
                 ConcurrentKafkaListenerContainerFactory<String, RiderCreatedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
                 factory.setConsumerFactory(consumerFactory);
+                enableObservation(factory);
 
                 return factory;
         }
@@ -221,7 +240,7 @@ public class KafkaConsumerConfig {
                 ConcurrentKafkaListenerContainerFactory<String, DriverMatchRequestedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
                 factory.setConsumerFactory(consumerFactory);
-
+                enableObservation(factory);
                 return factory;
         }
 
@@ -232,6 +251,7 @@ public class KafkaConsumerConfig {
                 ConcurrentKafkaListenerContainerFactory<String, DriverRideAcceptedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
                 factory.setConsumerFactory(consumerFactory);
+                enableObservation(factory);
 
                 return factory;
         }
@@ -243,7 +263,8 @@ public class KafkaConsumerConfig {
                 ConcurrentKafkaListenerContainerFactory<String, DriverRideRejectedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
                 factory.setConsumerFactory(consumerFactory);
-
+                enableObservation(factory);
+                
                 return factory;
         }
 
@@ -254,6 +275,7 @@ public class KafkaConsumerConfig {
                 ConcurrentKafkaListenerContainerFactory<String, DriverRideExpiredEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
                 factory.setConsumerFactory(consumerFactory);
+                enableObservation(factory);
 
                 return factory;
         }
@@ -265,6 +287,7 @@ public class KafkaConsumerConfig {
                 ConcurrentKafkaListenerContainerFactory<String, DriverArrivedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
                 factory.setConsumerFactory(consumerFactory);
+                enableObservation(factory);
 
                 return factory;
         }
@@ -276,6 +299,7 @@ public class KafkaConsumerConfig {
                 ConcurrentKafkaListenerContainerFactory<String, DriverTripStartedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
                 factory.setConsumerFactory(consumerFactory);
+                enableObservation(factory);
 
                 return factory;
         }
@@ -287,6 +311,7 @@ public class KafkaConsumerConfig {
                 ConcurrentKafkaListenerContainerFactory<String, DriverTripCompletedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
                 factory.setConsumerFactory(consumerFactory);
+                enableObservation(factory);
 
                 return factory;
         }
@@ -298,6 +323,7 @@ public class KafkaConsumerConfig {
                 ConcurrentKafkaListenerContainerFactory<String, PaymentSucceededEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
                 factory.setConsumerFactory(consumerFactory);
+                enableObservation(factory);
 
                 return factory;
         }
@@ -309,6 +335,7 @@ public class KafkaConsumerConfig {
                 ConcurrentKafkaListenerContainerFactory<String, PaymentFailedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
                 factory.setConsumerFactory(consumerFactory);
+                enableObservation(factory);
 
                 return factory;
         }
@@ -320,6 +347,19 @@ public class KafkaConsumerConfig {
                 ConcurrentKafkaListenerContainerFactory<String, PaymentRefundedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
                 factory.setConsumerFactory(consumerFactory);
+                enableObservation(factory);
+
+                return factory;
+        }
+
+        @Bean
+        public ConcurrentKafkaListenerContainerFactory<String, PaymentCreatedEvent> paymentCreatedKafkaListenerContainerFactory(
+                        ConsumerFactory<String, PaymentCreatedEvent> consumerFactory) {
+
+                ConcurrentKafkaListenerContainerFactory<String, PaymentCreatedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+
+                factory.setConsumerFactory(consumerFactory);
+                enableObservation(factory);
 
                 return factory;
         }

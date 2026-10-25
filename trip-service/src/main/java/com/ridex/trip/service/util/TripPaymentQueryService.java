@@ -4,45 +4,54 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.ridex.trip.dto.PaymentStatus;
 import com.ridex.trip.dto.response.TripPaymentResponse;
 import com.ridex.trip.entity.TripPayment;
+import com.ridex.trip.event.event.PaymentCreatedEvent;
 import com.ridex.trip.exception.IllegalOperationException;
 import com.ridex.trip.repository.TripPaymentRepository;
 
 @Service
 public class TripPaymentQueryService {
 
-    private final TripPaymentRepository repository;
+        private final TripPaymentRepository repository;
 
-    public TripPaymentQueryService(TripPaymentRepository repository) {
-        this.repository = repository;
-    }
-
-    public TripPaymentResponse getPaymentForTrip(
-            UUID tripId,
-            UUID authenticatedRiderId
-    ) {
-        TripPayment payment = repository.findById(tripId)
-                .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "Payment not found for trip: " + tripId
-                        )
-                );
-
-        if (!payment.getRiderId().equals(authenticatedRiderId)) {
-            throw new IllegalOperationException(
-                    "Rider does not own this trip"
-            );
+        public TripPaymentQueryService(TripPaymentRepository repository) {
+                this.repository = repository;
         }
 
-        return new TripPaymentResponse(
-                payment.getTripId(),
-                payment.getPaymentId(),
-                payment.getAmount(),
-                payment.getCurrency(),
-                payment.getStatus(),
-                payment.getPaidAt(),
-                payment.getRefundedAt()
-        );
-    }
+        public TripPaymentResponse getPaymentForTrip(
+                        UUID tripId,
+                        UUID authenticatedRiderId) {
+                TripPayment payment = repository.findById(tripId)
+                                .orElseThrow(() -> new IllegalArgumentException(
+                                                "Payment not found for trip: " + tripId));
+
+                if (!payment.getRiderId().equals(authenticatedRiderId)) {
+                        throw new IllegalOperationException(
+                                        "Rider does not own this trip");
+                }
+
+                return new TripPaymentResponse(
+                                payment.getTripId(),
+                                payment.getPaymentId(),
+                                payment.getAmount(),
+                                payment.getCurrency(),
+                                payment.getStatus(),
+                                payment.getPaidAt(),
+                                payment.getRefundedAt());
+        }
+
+        public void createPaymentForTrip(PaymentCreatedEvent event) {
+                TripPayment payment = new TripPayment(
+                                event.tripId(),
+                                event.paymentId(),
+                                event.riderId(),
+                                event.amount(),
+                                event.currency(),
+                                PaymentStatus.PENDING,
+                                event.createdAt());
+
+                repository.save(payment);
+        }
 }

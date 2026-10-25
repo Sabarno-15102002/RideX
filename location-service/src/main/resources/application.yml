@@ -33,6 +33,20 @@ management:
     distribution:
       percentiles-histogram:
         http.server.requests: true
+  tracing:
+        sampling:
+            probability: 1.0
+
+  opentelemetry:
+    tracing:
+      export:
+        otlp:
+          endpoint: http://tempo:4318/v1/traces
+
+  otlp:
+    metrics:
+      export:
+        enabled: false
 jwt:
   secret: ${JWT_SECRET:change-this-secret-key-to-a-long-random-value}
   expiration-ms: ${JWT_EXPIRATION_MS:900000}

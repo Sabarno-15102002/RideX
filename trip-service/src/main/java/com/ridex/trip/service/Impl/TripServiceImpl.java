@@ -404,7 +404,7 @@ public class TripServiceImpl implements TripService {
         }
 
         @Override
-        public TripStatus geTripStatus(UUID tripId) {
+        public TripStatus getTripStatus(UUID tripId) {
                 Trip trip = tripRepository.findById(tripId)
                                 .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Trip not found: " + tripId));

@@ -7,11 +7,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ridex.trip.entity.ProcessedEvent;
+import com.ridex.trip.event.event.PaymentCreatedEvent;
 import com.ridex.trip.event.event.PaymentFailedEvent;
 import com.ridex.trip.event.event.PaymentRefundedEvent;
 import com.ridex.trip.event.event.PaymentSucceededEvent;
 import com.ridex.trip.repository.ProcessedEventRepository;
 import com.ridex.trip.service.TripPaymentProjection;
+import com.ridex.trip.service.util.TripPaymentQueryService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -21,6 +23,7 @@ public class PaymentEventConsumer {
 
     private final TripPaymentProjection projection;
     private final ProcessedEventRepository processedEventRepository;
+    private final TripPaymentQueryService tripPaymentQueryService;
 
     @KafkaListener(
             topics = "payment.succeeded",
@@ -66,6 +69,21 @@ public class PaymentEventConsumer {
             return;
         }
         projection.project(event);
+
+        processedEventRepository.save(new ProcessedEvent(event.eventId(), Instant.now()));
+    }
+
+    @KafkaListener(
+            topics = "payment.created",
+            groupId = "trip-service",
+            containerFactory = "paymentCreatedKafkaListenerContainerFactory"
+    )
+    @Transactional
+    public void handlePaymentCreated(PaymentCreatedEvent event) {
+        if(processedEventRepository.existsById(event.eventId())){
+            return;
+        }
+        tripPaymentQueryService.createPaymentForTrip(event);
 
         processedEventRepository.save(new ProcessedEvent(event.eventId(), Instant.now()));
     }

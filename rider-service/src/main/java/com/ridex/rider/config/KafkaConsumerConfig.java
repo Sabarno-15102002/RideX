@@ -19,70 +19,65 @@ import com.ridex.rider.event.UserRegisteredEvent;
 @Configuration
 public class KafkaConsumerConfig {
 
-    @Value("${spring.kafka.bootstrap-servers}")
-    private String bootstrapServers;
+        @Value("${spring.kafka.bootstrap-servers}")
+        private String bootstrapServers;
 
-    @Bean
-    public ConsumerFactory<String, UserRegisteredEvent> consumerFactory() {
+        @Bean
+        public ConsumerFactory<String, UserRegisteredEvent> consumerFactory() {
 
-        JsonDeserializer<UserRegisteredEvent> deserializer =
-                new JsonDeserializer<>(UserRegisteredEvent.class);
+                JsonDeserializer<UserRegisteredEvent> deserializer = new JsonDeserializer<>(UserRegisteredEvent.class);
 
-        deserializer.setUseTypeHeaders(false);
-        deserializer.addTrustedPackages("com.ridex.rider.event");
+                deserializer.setUseTypeHeaders(false);
+                deserializer.addTrustedPackages("com.ridex.rider.event");
 
-        Map<String, Object> config = new HashMap<>();
+                Map<String, Object> config = new HashMap<>();
 
-        config.put(
-                ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
-                bootstrapServers
-        );
+                config.put(
+                                ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
+                                bootstrapServers);
 
-        config.put(
-                ConsumerConfig.GROUP_ID_CONFIG,
-                "rider-service"
-        );
+                config.put(
+                                ConsumerConfig.GROUP_ID_CONFIG,
+                                "rider-service");
 
-        config.put(
-                ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
-                StringDeserializer.class
-        );
+                config.put(
+                                ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
+                                StringDeserializer.class);
 
-        config.put(
-                ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
-                JsonDeserializer.class
-        );
+                config.put(
+                                ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
+                                JsonDeserializer.class);
 
-        config.put(
-                ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,
-                "earliest"
-        );
+                config.put(
+                                ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,
+                                "earliest");
 
-        config.put(
-                ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG,
-                false
-        );
+                config.put(
+                                ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG,
+                                false);
 
-        return new DefaultKafkaConsumerFactory<>(
-                config,
-                new StringDeserializer(),
-                deserializer
-        );
-    }
+                return new DefaultKafkaConsumerFactory<>(
+                                config,
+                                new StringDeserializer(),
+                                deserializer);
+        }
 
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, UserRegisteredEvent>
-    kafkaListenerContainerFactory(
-            ConsumerFactory<String, UserRegisteredEvent> consumerFactory,
-            DefaultErrorHandler errorHandler
-    ) {
+        private <K, V> void enableObservation(ConcurrentKafkaListenerContainerFactory<K, V> factory) {
 
-        ConcurrentKafkaListenerContainerFactory<String, UserRegisteredEvent> factory =
-                new ConcurrentKafkaListenerContainerFactory<>();
+                factory.getContainerProperties().setObservationEnabled(true);
+        }
 
-        factory.setConsumerFactory(consumerFactory);
-        factory.setCommonErrorHandler(errorHandler);
+        @Bean
+        public ConcurrentKafkaListenerContainerFactory<String, UserRegisteredEvent> kafkaListenerContainerFactory(
+                        ConsumerFactory<String, UserRegisteredEvent> consumerFactory,
+                        DefaultErrorHandler errorHandler) {
 
-        return factory;
-    }
+                ConcurrentKafkaListenerContainerFactory<String, UserRegisteredEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+
+                factory.setConsumerFactory(consumerFactory);
+                factory.setCommonErrorHandler(errorHandler);
+                enableObservation(factory);
+
+                return factory;
+        }
 }

@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 
 import com.ridex.payment.entity.OutboxEvent;
 import com.ridex.payment.event.EventSerializer;
+import com.ridex.payment.event.PaymentCreatedEvent;
 import com.ridex.payment.event.PaymentFailedEvent;
 import com.ridex.payment.event.PaymentRefundedEvent;
 import com.ridex.payment.event.PaymentSucceededEvent;
@@ -52,6 +53,18 @@ public class OutboxEventService {
                 .build();
 
         outboxEventRepository.save(outboxEvent);
-    }    
+    }
+    
+    public void savePaymentCreatedEvent(PaymentCreatedEvent event) {
+
+        OutboxEvent outboxEvent = OutboxEvent.builder()
+                .aggregateType("PAYMENT")
+                .aggregateId(event.paymentId())
+                .eventType("PAYMENT_CREATED")
+                .payload(eventSerializer.serialize(event))
+                .build();
+
+        outboxEventRepository.save(outboxEvent);
+    }
 
 }

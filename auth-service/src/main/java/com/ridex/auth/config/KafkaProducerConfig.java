@@ -55,6 +55,10 @@ public class KafkaProducerConfig {
     public KafkaTemplate<String, String> kafkaTemplate(
             ProducerFactory<String, String> producerFactory
     ) {
-        return new KafkaTemplate<>(producerFactory);
+        KafkaTemplate<String, String> template =
+            new KafkaTemplate<>(producerFactory);
+
+        template.setObservationEnabled(true);
+        return template;
     }
 }

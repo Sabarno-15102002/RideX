@@ -20,6 +20,7 @@ public class OutboxPublisher {
     private static final String PAYMENT_SUCCEEDED_TOPIC = "payment.succeeded";
     private static final String PAYMENT_FAILED_TOPIC = "payment.failed";
     private static final String PAYMENT_REFUNDED_TOPIC = "payment.refunded";
+    private static final String PAYMENT_CREATED_TOPIC = "payment.created";
 
     private final OutboxEventRepository outboxEventRepository;
 
@@ -63,7 +64,11 @@ public class OutboxPublisher {
             case "PAYMENT_REFUNDED":
                 topic = PAYMENT_REFUNDED_TOPIC;
                 break;
-        
+
+            case "PAYMENT_CREATED":
+                topic = PAYMENT_CREATED_TOPIC;
+                break;
+
             default:
                 topic = PAYMENT_FAILED_TOPIC;
                 break;

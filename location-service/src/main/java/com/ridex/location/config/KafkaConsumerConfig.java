@@ -62,6 +62,11 @@ public class KafkaConsumerConfig {
                 return config;
         }
 
+        private <K, V> void enableObservation(ConcurrentKafkaListenerContainerFactory<K, V> factory) {
+
+                factory.getContainerProperties().setObservationEnabled(true);
+        }
+
         @Bean
         public ConsumerFactory<String, DriverStatusChangedEvent> driverStatusChangedConsumerFactory() {
 
@@ -94,7 +99,7 @@ public class KafkaConsumerConfig {
                 ConcurrentKafkaListenerContainerFactory<String, DriverStatusChangedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
                 factory.setConsumerFactory(consumerFactory);
-
+                enableObservation(factory);
                 return factory;
         }
 
@@ -105,6 +110,7 @@ public class KafkaConsumerConfig {
                 ConcurrentKafkaListenerContainerFactory<String, TripCompletedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
                 factory.setConsumerFactory(consumerFactory);
+                enableObservation(factory);
 
                 return factory;
         }

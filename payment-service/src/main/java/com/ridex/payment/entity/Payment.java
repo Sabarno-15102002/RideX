@@ -22,6 +22,7 @@ import com.ridex.payment.dto.PaymentStatus;
 public class Payment {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(name = "trip_id", nullable = false, unique = true)

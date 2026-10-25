@@ -25,16 +25,19 @@ public class LocationServiceClient {
         private final RestClient restClient;
 
         public LocationServiceClient(
-                        LoadBalancerClient loadBalancerClient) {
+                LoadBalancerClient loadBalancerClient,
+                RestClient.Builder restClientBuilder) {
+
                 this.loadBalancerClient = loadBalancerClient;
 
-                JdkClientHttpRequestFactory requestFactory = new JdkClientHttpRequestFactory();
+                JdkClientHttpRequestFactory requestFactory =
+                        new JdkClientHttpRequestFactory();
 
                 requestFactory.setReadTimeout(Duration.ofSeconds(2));
 
-                this.restClient = RestClient.builder()
-                                .requestFactory(requestFactory)
-                                .build();
+                this.restClient = restClientBuilder
+                        .requestFactory(requestFactory)
+                        .build();
         }
 
         @Retryable(retryFor = RestClientException.class, maxAttempts = 2, backoff = @Backoff(delay = 100))

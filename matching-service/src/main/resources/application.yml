@@ -1,31 +1,35 @@
 spring:
-    application:
-        name: matching-service
-    datasource:
-        url: ${DB_URL:jdbc:postgresql://localhost:5432/matching_db}
-        username: ${DB_USERNAME:postgres}
-        password: ${DB_PASSWORD:postgres}
+  application:
+    name: matching-service
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/matching_db}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
 
-    jpa:
-        hibernate:
-            ddl-auto: validate
-        open-in-view: false
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
 
-    flyway:
-        enabled: true
-    kafka:
-        bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+  flyway:
+    enabled: true
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
 
-        consumer:
-          group-id: matching-service
-          auto-offset-reset: earliest
-          enable-auto-commit: false
+    consumer:
+      group-id: matching-service
+      auto-offset-reset: earliest
+      enable-auto-commit: false
 
-          key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
-          value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
 
-          properties:
-              spring.json.trusted.packages: "com.ridex.matching.event"
+      properties:
+        spring.json.trusted.packages: "com.ridex.matching.event"
+    listener:
+      observation-enabled: true
+    template:
+      observation-enabled: true
 
 server:
   port: ${SERVER_PORT:8086}
@@ -39,6 +43,18 @@ management:
     distribution:
       percentiles-histogram:
         http.server.requests: true
+  tracing:
+    sampling:
+      probability: 1.0
+  opentelemetry:
+    tracing:
+      export:
+        otlp:
+          endpoint: http://tempo:4318/v1/traces
+  otlp:
+    metrics:
+      export:
+        enabled: false
 
 jwt:
   secret: ${JWT_SECRET:change-this-secret-key-to-a-long-random-value}

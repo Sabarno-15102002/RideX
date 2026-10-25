@@ -28,6 +28,10 @@ spring:
 
             properties:
                 spring.json.trusted.packages: "com.ridex.trip.event"
+        listener:
+            observation-enabled: true
+        template:
+            observation-enabled: true
 
 jwt:
     secret: ${JWT_SECRET:change-this-secret-key-to-a-long-random-value}
@@ -50,7 +54,19 @@ management:
         distribution:
             percentiles-histogram:
                 http.server.requests: true
+    tracing:
+        sampling:
+            probability: 1.0
+    opentelemetry:
+        tracing:
+            export:
+                otlp:
+                    endpoint: http://tempo:4318/v1/traces
+    otlp:
+        metrics:
+            export:
+                enabled: false
 
 logging:
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [correlationId=%X{correlationId}] %logger{36} - %msg%n"
+    pattern:
+        console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [correlationId=%X{correlationId}] %logger{36} - %msg%n"

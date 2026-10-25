@@ -423,8 +423,12 @@ echo "Rider JWT acquired."
 # 9. Create TRIP
 # ============================================================
 
-sleep 1 # To ensure driver is available before creating trip
+
 print_section "9. Creating TRIP"
+
+MAX_ATTEMPTS=15
+SLEEP_SECONDS=1
+TRIP_ID=""
 
 TRIP_BODY="{
     \"pickupLatitude\": $PICKUP_LAT,
@@ -436,34 +440,54 @@ TRIP_BODY="{
 echo "Trip request:"
 echo "$TRIP_BODY"
 
-TRIP_RESPONSE=$(
-    curl -sS \
-        -w '\n%{http_code}' \
-        -X POST \
-        "$BASE_URL/api/v1/trips" \
-        -H "Authorization: Bearer $RIDER_TOKEN" \
-        -H "Content-Type: application/json" \
-        -d "$TRIP_BODY"
-)
+for ((attempt=1; attempt<=MAX_ATTEMPTS; attempt++)); do
+    echo
+    echo "Attempt $attempt/$MAX_ATTEMPTS: creating trip..."
 
-TRIP_STATUS="$(echo "$TRIP_RESPONSE" | tail -n1)"
-TRIP_RESPONSE_BODY="$(echo "$TRIP_RESPONSE" | sed '$d')"
+    TRIP_RESPONSE=$(
+        curl -sS \
+            -w '\n%{http_code}' \
+            -X POST \
+            "$BASE_URL/api/v1/trips" \
+            -H "Authorization: Bearer $RIDER_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "$TRIP_BODY"
+    )
 
-print_response \
-    "$TRIP_STATUS" \
-    "$TRIP_RESPONSE_BODY"
+    TRIP_STATUS="$(echo "$TRIP_RESPONSE" | tail -n1)"
+    TRIP_RESPONSE_BODY="$(echo "$TRIP_RESPONSE" | sed '$d')"
 
-if [[ "$TRIP_STATUS" != 2* ]]; then
-    echo "ERROR: Trip creation failed."
+    print_response "$TRIP_STATUS" "$TRIP_RESPONSE_BODY"
+
+    if [[ "$TRIP_STATUS" == 2* ]]; then
+        TRIP_ID="$(
+            extract_json "$TRIP_RESPONSE_BODY" tripId id
+        )"
+
+        if [[ -n "${TRIP_ID:-}" ]]; then
+            break
+        fi
+
+        echo "Trip creation succeeded, but no trip ID was returned."
+    else
+        echo "Trip creation attempt failed."
+    fi
+
+    if (( attempt < MAX_ATTEMPTS )); then
+        echo "Waiting ${SLEEP_SECONDS}s before retrying..."
+        sleep "$SLEEP_SECONDS"
+    fi
+done
+
+if [[ -z "${TRIP_ID:-}" ]]; then
+    echo
+    echo "ERROR: Trip was not created successfully after $MAX_ATTEMPTS attempts."
     exit 1
 fi
 
-TRIP_ID="$(
-    extract_json "$TRIP_RESPONSE_BODY" tripId id
-)"
-
 echo
-echo "Trip ID: ${TRIP_ID:-NOT_RETURNED}"
+echo "Trip ID: $TRIP_ID"
+
 
 # ============================================================
 # 10. Check Trip Status

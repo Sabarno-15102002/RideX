@@ -50,7 +50,11 @@ public class KafkaProducerConfig {
     public KafkaTemplate<String, String> outboxKafkaTemplate(
             ProducerFactory<String, String> outboxProducerFactory
     ) {
-        return new KafkaTemplate<>(outboxProducerFactory);
+        KafkaTemplate<String, String> template =
+            new KafkaTemplate<>(outboxProducerFactory);
+
+        template.setObservationEnabled(true);
+        return template;
     }
 
     // =========================================================
@@ -84,6 +88,10 @@ public class KafkaProducerConfig {
     public KafkaTemplate<String, Object> dltKafkaTemplate(
             ProducerFactory<String, Object> dltProducerFactory
     ) {
-        return new KafkaTemplate<>(dltProducerFactory);
+        KafkaTemplate<String, Object> template =
+            new KafkaTemplate<>(dltProducerFactory);
+
+        template.setObservationEnabled(true);
+        return template;
     }
 }

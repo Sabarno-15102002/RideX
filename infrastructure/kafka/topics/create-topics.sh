@@ -51,5 +51,7 @@ create_topic "payment.failed" 3
 create_topic "payment.failed.DLT" 3
 create_topic "payment.refunded" 3
 create_topic "payment.refunded.DLT" 3
+create_topic "payment.created" 3
+create_topic "payment.created.DLT" 3
 
 echo "Kafka topic setup completed."

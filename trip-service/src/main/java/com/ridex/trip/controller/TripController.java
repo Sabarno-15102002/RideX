@@ -54,7 +54,7 @@ public class TripController {
     }
 
     @GetMapping("/{tripId}")
-    public ResponseEntity<TripStatus> geTripStatus(@PathVariable UUID tripId){
-        return ResponseEntity.ok(tripService.geTripStatus(tripId));
+    public ResponseEntity<TripStatus> getTripStatus(@PathVariable UUID tripId){
+        return ResponseEntity.ok(tripService.getTripStatus(tripId));
     }
 }

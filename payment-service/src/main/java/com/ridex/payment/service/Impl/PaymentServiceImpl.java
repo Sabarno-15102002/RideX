@@ -17,6 +17,7 @@ import com.ridex.payment.dto.response.PaymentResponse;
 import com.ridex.payment.dto.response.PaymentResult;
 import com.ridex.payment.entity.Payment;
 import com.ridex.payment.entity.PaymentAttempt;
+import com.ridex.payment.event.PaymentCreatedEvent;
 import com.ridex.payment.event.PaymentFailedEvent;
 import com.ridex.payment.event.PaymentRefundedEvent;
 import com.ridex.payment.event.PaymentSucceededEvent;
@@ -58,7 +59,6 @@ public class PaymentServiceImpl implements PaymentService {
 
                 Payment payment = new Payment();
 
-                payment.setId(UUID.randomUUID());
                 payment.setTripId(event.tripId());
                 payment.setRiderId(event.riderId());
 
@@ -73,8 +73,20 @@ public class PaymentServiceImpl implements PaymentService {
 
                 payment.setCreatedAt(now);
                 payment.setUpdatedAt(now);
+                
+                Payment createdPayment = paymentRepository.save(payment);
 
-                return toResponse(paymentRepository.save(payment));
+                PaymentCreatedEvent paymentCreatedEvent = new PaymentCreatedEvent(
+                                UUID.randomUUID(),
+                                createdPayment.getId(),
+                                createdPayment.getTripId(),
+                                createdPayment.getRiderId(),
+                                createdPayment.getAmount(),
+                                createdPayment.getCurrency(),
+                                Instant.now()
+                );
+                outboxEventService.savePaymentCreatedEvent(paymentCreatedEvent);
+                return toResponse(createdPayment);
         }
 
         @Override

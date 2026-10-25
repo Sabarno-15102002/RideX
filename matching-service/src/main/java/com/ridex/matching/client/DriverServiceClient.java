@@ -23,16 +23,19 @@ public class DriverServiceClient {
         private final RestClient restClient;
 
         public DriverServiceClient(
-                        LoadBalancerClient loadBalancerClient) {
+                LoadBalancerClient loadBalancerClient,
+                RestClient.Builder restClientBuilder) {
+                
                 this.loadBalancerClient = loadBalancerClient;
 
-                JdkClientHttpRequestFactory requestFactory = new JdkClientHttpRequestFactory();
+                JdkClientHttpRequestFactory requestFactory =
+                        new JdkClientHttpRequestFactory();
 
                 requestFactory.setReadTimeout(Duration.ofSeconds(2));
 
-                this.restClient = RestClient.builder()
-                                .requestFactory(requestFactory)
-                                .build();
+                this.restClient = restClientBuilder
+                        .requestFactory(requestFactory)
+                        .build();
         }
 
         public boolean reserveDriver(UUID driverId, UUID tripId) {

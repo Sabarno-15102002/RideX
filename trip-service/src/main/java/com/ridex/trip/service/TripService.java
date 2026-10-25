@@ -31,6 +31,6 @@ public interface TripService {
 
     void handleDriverTripCompleted(DriverTripCompletedEvent event);
 
-    TripStatus geTripStatus(UUID tripId);
+    TripStatus getTripStatus(UUID tripId);
 
 }
