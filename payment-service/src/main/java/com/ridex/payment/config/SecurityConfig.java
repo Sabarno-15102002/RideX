@@ -34,7 +34,8 @@ public class SecurityConfig {
                                                 .requestMatchers(
                                                                 "/actuator/**",
                                                                 "/ws/*",
-                                                                "/api/v1/internal/**")
+                                                                "/api/v1/internal/**",
+                                                                "/api/v1/payments/webhooks/**")
                                                 .permitAll()
                                                 .anyRequest()
                                                 .authenticated())

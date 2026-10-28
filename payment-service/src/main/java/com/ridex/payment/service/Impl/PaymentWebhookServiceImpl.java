@@ -1,23 +1,27 @@
 package com.ridex.payment.service.Impl;
 
 import java.time.Instant;
+import java.util.UUID;
 
 import org.apache.kafka.common.errors.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ridex.payment.config.PaymentMetrics;
 import com.ridex.payment.dto.PaymentAttemptStatus;
 import com.ridex.payment.dto.PaymentProviderWebhook;
 import com.ridex.payment.dto.PaymentStatus;
 import com.ridex.payment.entity.Payment;
 import com.ridex.payment.entity.PaymentAttempt;
 import com.ridex.payment.entity.PaymentProviderEvent;
+import com.ridex.payment.event.PaymentSucceededEvent;
 import com.ridex.payment.exception.IllegalOperationException;
 import com.ridex.payment.exception.InvalidPaymentStateException;
 import com.ridex.payment.repository.PaymentAttemptRepository;
 import com.ridex.payment.repository.PaymentProviderEventRepository;
 import com.ridex.payment.repository.PaymentRepository;
 import com.ridex.payment.service.PaymentWebhookService;
+import com.ridex.payment.service.util.OutboxEventService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -28,6 +32,8 @@ public class PaymentWebhookServiceImpl implements PaymentWebhookService {
         private final PaymentProviderEventRepository paymentProviderEventRepository;
         private final PaymentRepository paymentRepository;
         private final PaymentAttemptRepository paymentAttemptRepository;
+        private final OutboxEventService outboxEventService;
+        private final PaymentMetrics paymentMetrics;
 
         @Override
         @Transactional
@@ -111,8 +117,24 @@ public class PaymentWebhookServiceImpl implements PaymentWebhookService {
                  */
                 payment.setStatus(targetPaymentStatus);
                 payment.setUpdatedAt(now);
-
+                payment.setProviderPaymentId(webhook.providerPaymentId());
+                
                 paymentRepository.save(payment);
+                
+                if(payment.getStatus() == PaymentStatus.SUCCESS) {
+                        PaymentSucceededEvent event = new PaymentSucceededEvent(
+                                        UUID.randomUUID(),
+                                payment.getId(),
+                                payment.getTripId(),
+                                payment.getRiderId(),
+                                payment.getAmount(),
+                                payment.getCurrency(),
+                                Instant.now()
+                        );
+                        paymentMetrics.recordPaymentSucceeded();
+                        paymentMetrics.recordPaymentProcessingDuration(Instant.now().toEpochMilli() - payment.getCreatedAt().toEpochMilli());
+                        outboxEventService.savePaymentSucceededEvent(event);
+                }
 
                 /*
                  * 10. Record provider event.

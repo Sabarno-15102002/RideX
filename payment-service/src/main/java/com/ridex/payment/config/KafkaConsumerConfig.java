@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,12 +40,15 @@ public class KafkaConsumerConfig {
                                 ErrorHandlingDeserializer.class);
 
                 config.put(
+                                ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS,
+                                StringDeserializer.class);
+                config.put(
                                 ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS,
                                 JsonDeserializer.class);
 
                 config.put(
                                 JsonDeserializer.TRUSTED_PACKAGES,
-                                "com.ridex.trip.event");
+                                "com.ridex.payment.event");
 
                 config.put(
                                 ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG,
@@ -63,7 +67,7 @@ public class KafkaConsumerConfig {
         }
 
         @Bean
-        public ConsumerFactory<String, TripCompletedEvent> userRegisteredConsumerFactory() {
+        public ConsumerFactory<String, TripCompletedEvent> tripCompletedConsumerFactory() {
 
                 Map<String, Object> config = consumerProperties();
 

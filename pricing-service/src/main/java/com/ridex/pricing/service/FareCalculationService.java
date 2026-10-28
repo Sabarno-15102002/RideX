@@ -11,6 +11,8 @@ public interface FareCalculationService {
 
     FareQuote createFareQuote(TripCompletedEvent event);
 
+    FareQuoteResponse getFareQuote(UUID tripId, UUID riderId);
+
     FareQuoteResponse getFareQuote(UUID tripId);
 
 }

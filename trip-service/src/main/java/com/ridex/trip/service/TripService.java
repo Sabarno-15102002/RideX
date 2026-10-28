@@ -2,9 +2,9 @@ package com.ridex.trip.service;
 
 import java.util.UUID;
 
-import com.ridex.trip.dto.TripStatus;
 import com.ridex.trip.dto.request.CreateTripRequest;
 import com.ridex.trip.dto.response.TripResponse;
+import com.ridex.trip.dto.response.TripStatusResponse;
 import com.ridex.trip.event.event.DriverArrivedEvent;
 import com.ridex.trip.event.event.DriverMatchRequestedEvent;
 import com.ridex.trip.event.event.DriverRideAcceptedEvent;
@@ -31,6 +31,8 @@ public interface TripService {
 
     void handleDriverTripCompleted(DriverTripCompletedEvent event);
 
-    TripStatus getTripStatus(UUID tripId);
+    TripStatusResponse getTripStatus(UUID tripId);
+
+    TripResponse getTrip(UUID userId, UUID tripId);
 
 }

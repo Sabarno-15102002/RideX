@@ -11,16 +11,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ridex.trip.config.SecurityUtils;
-import com.ridex.trip.dto.TripStatus;
 import com.ridex.trip.dto.request.CreateTripRequest;
 import com.ridex.trip.dto.response.TripPaymentResponse;
 import com.ridex.trip.dto.response.TripResponse;
+import com.ridex.trip.dto.response.TripStatusResponse;
 import com.ridex.trip.service.RiderIdentityService;
 import com.ridex.trip.service.TripService;
 import com.ridex.trip.service.util.TripPaymentQueryService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
 
 @RestController
 @RequestMapping("/api/v1/trips")
@@ -53,8 +54,15 @@ public class TripController {
         ));
     }
 
-    @GetMapping("/{tripId}")
-    public ResponseEntity<TripStatus> getTripStatus(@PathVariable UUID tripId){
+    @GetMapping("/status/{tripId}")
+    public ResponseEntity<TripStatusResponse> getTripStatus(@PathVariable UUID tripId){
         return ResponseEntity.ok(tripService.getTripStatus(tripId));
     }
+
+    @GetMapping("/{tripId}")
+    public ResponseEntity<TripResponse> getTrip(@PathVariable UUID tripId) {
+        UUID userId = SecurityUtils.getCurrentUserId();
+        return ResponseEntity.ok(tripService.getTrip(userId, tripId));
+    }
+    
 }

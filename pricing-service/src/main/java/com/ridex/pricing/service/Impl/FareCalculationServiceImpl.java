@@ -129,8 +129,32 @@ public class FareCalculationServiceImpl implements FareCalculationService {
 
         @Override 
         @Transactional(readOnly = true)
-        public FareQuoteResponse getFareQuote(UUID tripId) {
+        public FareQuoteResponse getFareQuote(UUID tripId, UUID riderId) {
 
+                FareQuote quote = fareQuoteRepository.findByTripId(tripId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Fare quote not found for trip: " + tripId));
+
+                if (!quote.getRiderId().equals(riderId)) {
+                        throw new ResourceNotFoundException(
+                                        "Fare quote not found for trip: " + tripId + " and rider: " + riderId);
+                }
+
+                return new FareQuoteResponse(
+                                quote.getTripId(),
+                                quote.getRiderId(),
+                                quote.getBaseFare(),
+                                quote.getDistanceKm(),
+                                quote.getDurationMinutes(),
+                                quote.getDistanceFare(),
+                                quote.getDurationFare(),
+                                quote.getTotalFare(),
+                                quote.getCurrency());
+        }
+
+        @Override
+        @Transactional(readOnly = true)
+        public FareQuoteResponse getFareQuote(UUID tripId) {
                 FareQuote quote = fareQuoteRepository.findByTripId(tripId)
                                 .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Fare quote not found for trip: " + tripId));

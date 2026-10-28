@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,6 +14,7 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
+import com.ridex.pricing.event.RiderCreatedEvent;
 import com.ridex.pricing.event.TripCompletedEvent;
 
 @Configuration
@@ -36,6 +38,10 @@ public class KafkaConsumerConfig {
                 config.put(
                                 ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
                                 ErrorHandlingDeserializer.class);
+                
+                config.put(
+                                ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS,
+                                StringDeserializer.class);
 
                 config.put(
                                 ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS,
@@ -43,7 +49,7 @@ public class KafkaConsumerConfig {
 
                 config.put(
                                 JsonDeserializer.TRUSTED_PACKAGES,
-                                "com.ridex.trip.event");
+                                "com.ridex.pricing.event");
 
                 config.put(
                                 ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG,
@@ -62,7 +68,7 @@ public class KafkaConsumerConfig {
         }
 
         @Bean
-        public ConsumerFactory<String, TripCompletedEvent> userRegisteredConsumerFactory() {
+        public ConsumerFactory<String, TripCompletedEvent> tripCompletedConsumerFactory() {
 
                 Map<String, Object> config = consumerProperties();
 
@@ -74,10 +80,34 @@ public class KafkaConsumerConfig {
         }
 
         @Bean
+        public ConsumerFactory<String, RiderCreatedEvent> riderCreatedConsumerFactory() {
+
+                Map<String, Object> config = consumerProperties();
+
+                config.put(
+                                JsonDeserializer.VALUE_DEFAULT_TYPE,
+                                RiderCreatedEvent.class);
+
+                return new DefaultKafkaConsumerFactory<>(config);
+        }
+
+        @Bean
         public ConcurrentKafkaListenerContainerFactory<String, TripCompletedEvent> tripCompletedKafkaListenerContainerFactory(
                         ConsumerFactory<String, TripCompletedEvent> consumerFactory) {
 
                 ConcurrentKafkaListenerContainerFactory<String, TripCompletedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+
+                factory.setConsumerFactory(consumerFactory);
+                enableObservation(factory);
+
+                return factory;
+        }
+
+        @Bean
+        public ConcurrentKafkaListenerContainerFactory<String, RiderCreatedEvent> riderCreatedKafkaListenerContainerFactory(
+                        ConsumerFactory<String, RiderCreatedEvent> consumerFactory) {
+
+                ConcurrentKafkaListenerContainerFactory<String, RiderCreatedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
                 factory.setConsumerFactory(consumerFactory);
                 enableObservation(factory);

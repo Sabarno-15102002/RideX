@@ -12,6 +12,7 @@ import com.ridex.trip.dto.PaymentSummary;
 import com.ridex.trip.dto.TripStatus;
 import com.ridex.trip.dto.request.CreateTripRequest;
 import com.ridex.trip.dto.response.TripResponse;
+import com.ridex.trip.dto.response.TripStatusResponse;
 import com.ridex.trip.entity.ProcessedEvent;
 import com.ridex.trip.entity.RiderIdentity;
 import com.ridex.trip.entity.Trip;
@@ -404,11 +405,29 @@ public class TripServiceImpl implements TripService {
         }
 
         @Override
-        public TripStatus getTripStatus(UUID tripId) {
+        public TripStatusResponse getTripStatus(UUID tripId) {
                 Trip trip = tripRepository.findById(tripId)
                                 .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Trip not found: " + tripId));
 
-                return trip.getStatus();
+                return new TripStatusResponse(trip.getStatus());
+        }
+
+        @Override
+        public TripResponse getTrip(UUID userId, UUID tripId) {
+                RiderIdentity riderIdentity = riderIdentityRepository.findById(userId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Rider profile not found"));
+
+                Trip trip = tripRepository.findById(tripId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Trip not found: " + tripId));
+
+                if (!trip.getRiderId().equals(riderIdentity.getRiderId())) {
+                        throw new IllegalOperationException(
+                                        "User is not authorized to access this trip");
+                }
+
+                return toResponse(trip);
         }
 }

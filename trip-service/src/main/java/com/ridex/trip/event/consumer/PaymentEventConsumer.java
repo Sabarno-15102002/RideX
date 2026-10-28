@@ -16,9 +16,11 @@ import com.ridex.trip.service.TripPaymentProjection;
 import com.ridex.trip.service.util.TripPaymentQueryService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
-@RequiredArgsConstructor 
+@RequiredArgsConstructor
+@Slf4j
 public class PaymentEventConsumer {
 
     private final TripPaymentProjection projection;
@@ -38,6 +40,12 @@ public class PaymentEventConsumer {
         }
         projection.project(event);
 
+        log.info(
+                "Received PAYMENT_SUCCEEDED: eventId={}, tripId={}, riderId={}",
+                event.eventId(),
+                event.tripId(),
+                event.riderId()
+        );
         processedEventRepository.save(new ProcessedEvent(event.eventId(), Instant.now()));
     }
 
@@ -54,6 +62,12 @@ public class PaymentEventConsumer {
         }
         projection.project(event);
 
+        log.info(
+                "Received PAYMENT_FAILED: eventId={}, tripId={}, riderId={}",
+                event.eventId(),
+                event.tripId(),
+                event.riderId()
+        );
         processedEventRepository.save(new ProcessedEvent(event.eventId(), Instant.now()));
     }
 
@@ -70,6 +84,12 @@ public class PaymentEventConsumer {
         }
         projection.project(event);
 
+        log.info(
+                "Received PAYMENT_REFUNDED: eventId={}, tripId={}, riderId={}",
+                event.eventId(),
+                event.tripId(),
+                event.riderId()
+        );
         processedEventRepository.save(new ProcessedEvent(event.eventId(), Instant.now()));
     }
 
@@ -85,6 +105,12 @@ public class PaymentEventConsumer {
         }
         tripPaymentQueryService.createPaymentForTrip(event);
 
+        log.info(
+                "Received PAYMENT_CREATED: eventId={}, tripId={}, riderId={}",
+                event.eventId(),
+                event.tripId(),
+                event.riderId()
+        );
         processedEventRepository.save(new ProcessedEvent(event.eventId(), Instant.now()));
     }
 }

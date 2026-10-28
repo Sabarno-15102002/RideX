@@ -20,7 +20,6 @@ public class OutboxEventService {
             DriverMatchRequestedEvent event
     ) {
         OutboxEvent outboxEvent = OutboxEvent.builder()
-                .id(event.eventId())
                 .aggregateType("DRIVER_MATCH")
                 .aggregateId(event.driverId())
                 .eventType("DRIVER_MATCH_REQUESTED")

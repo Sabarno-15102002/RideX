@@ -111,7 +111,8 @@ public class OutboxPublisher {
         outboxEventRepository.save(event);
 
         log.info(
-                "Published outbox event: {}",
+                "Published outbox event for {}: {}",
+                event.getEventType(),
                 event.getId()
         );
     }

@@ -632,16 +632,18 @@ get_trip_status() {
         curl -sS \
             -w '\n%{http_code}' \
             -X GET \
-            "$BASE_URL/api/v1/trips/$TRIP_ID" \
+            "$BASE_URL/api/v1/trips/status/$TRIP_ID" \
             -H "Authorization: Bearer $RIDER_TOKEN"
     )
 
     code="$(echo "$response" | tail -n1)"
     body="$(echo "$response" | sed '$d')"
 
+    echo "DEBUG HTTP STATUS: $code" >&2
+    echo "DEBUG RESPONSE BODY: $body" >&2
+
     if [[ "$code" != 2* ]]; then
         echo "HTTP_$code"
-        echo "Response: $body"
         return 0
     fi
 
@@ -872,6 +874,8 @@ for ((attempt=1; attempt<=30; attempt++)); do
     FARE_STATUS_CODE="$(echo "$FARE_RESPONSE" | tail -n1)"
     FARE_BODY="$(echo "$FARE_RESPONSE" | sed '$d')"
 
+    echo "DEBUG FARE HTTP STATUS: $FARE_STATUS_CODE" >&2
+
     if [[ "$FARE_STATUS_CODE" == 2* ]]; then
         FARE_TOTAL="$(
             extract_json "$FARE_BODY" totalFare
@@ -919,6 +923,7 @@ for ((attempt=1; attempt<=30; attempt++)); do
 
     PAYMENT_HTTP_STATUS="$(echo "$PAYMENT_RESPONSE" | tail -n1)"
     PAYMENT_BODY="$(echo "$PAYMENT_RESPONSE" | sed '$d')"
+    echo "DEBUG PAYMENT HTTP STATUS: $PAYMENT_HTTP_STATUS" >&2
 
     if [[ "$PAYMENT_HTTP_STATUS" == 2* ]]; then
         PAYMENT_ID="$(
@@ -986,10 +991,80 @@ echo
 echo "Payment after initiation: ${PAYMENT_STATUS:-UNKNOWN}"
 
 # ============================================================
-# 25. Wait for PAYMENT SUCCESS
+# 25. Simulate successful MOCK PAYMENT WEBHOOK
 # ============================================================
 
-print_section "25. Waiting for PAYMENT SUCCESS"
+print_section "25. Sending MOCK PAYMENT SUCCESS webhook"
+
+# The mock provider generates providerPaymentId as:
+#   mock_<payment idempotency key>
+# Prefer providerPaymentId returned by the initiate response. If the response
+# instead exposes idempotencyKey, derive the mock provider ID from that.
+# MOCK_PROVIDER_PAYMENT_ID can be supplied explicitly if the API response
+# doesn't expose either value.
+PAYMENT_IDEMPOTENCY_KEY="$(extract_json "$PAYMENT_INITIATE_BODY" idempotencyKey)"
+PROVIDER_PAYMENT_ID="${MOCK_PROVIDER_PAYMENT_ID:-$(extract_json "$PAYMENT_INITIATE_BODY" providerPaymentId)}"
+
+if [[ -z "$PROVIDER_PAYMENT_ID" && -n "$PAYMENT_IDEMPOTENCY_KEY" ]]; then
+    PROVIDER_PAYMENT_ID="mock_${PAYMENT_IDEMPOTENCY_KEY}"
+fi
+
+if [[ -z "$PROVIDER_PAYMENT_ID" ]]; then
+    echo "ERROR: Could not determine providerPaymentId for the mock webhook."
+    echo "The payment initiation response must include providerPaymentId or idempotencyKey,"
+    echo "or rerun with MOCK_PROVIDER_PAYMENT_ID=<actual-provider-payment-id>."
+    echo "Initiation response:"
+    echo "$PAYMENT_INITIATE_BODY"
+    exit 1
+fi
+
+WEBHOOK_EVENT_ID="ridex-test-success-${TIMESTAMP}-$(date +%s)-${RANDOM}"
+WEBHOOK_PAYLOAD="$(python3 - "$PROVIDER_PAYMENT_ID" "$PAYMENT_IDEMPOTENCY_KEY" "$WEBHOOK_EVENT_ID" <<'PY'
+import json
+import sys
+
+print(json.dumps({
+    "providerPaymentId": sys.argv[1],
+    "idempotencyKey": sys.argv[2],
+    "status": "SUCCESS",
+    "eventId": sys.argv[3],
+    "failureReason": None
+}))
+PY
+)"
+
+echo "Provider payment ID: $PROVIDER_PAYMENT_ID"
+echo "Webhook event ID: $WEBHOOK_EVENT_ID"
+
+echo "Sending mock SUCCESS webhook..."
+PAYMENT_WEBHOOK_RESPONSE=$(
+    curl -sS \
+        -w '\n%{http_code}' \
+        -X POST \
+        "$BASE_URL/api/v1/payments/webhooks/mock" \
+        -H "Content-Type: application/json" \
+        -H "X-Payment-Signature: mock-valid-signature" \
+        -d "$WEBHOOK_PAYLOAD"
+)
+
+PAYMENT_WEBHOOK_STATUS="$(echo "$PAYMENT_WEBHOOK_RESPONSE" | tail -n1)"
+PAYMENT_WEBHOOK_BODY="$(echo "$PAYMENT_WEBHOOK_RESPONSE" | sed '$d')"
+
+print_response "$PAYMENT_WEBHOOK_STATUS" "$PAYMENT_WEBHOOK_BODY"
+
+if [[ "$PAYMENT_WEBHOOK_STATUS" != 2* ]]; then
+    echo "ERROR: Mock payment SUCCESS webhook was rejected."
+    echo "Check that the payment attempt is PROCESSING and providerPaymentId matches."
+    exit 1
+fi
+
+echo "Mock payment SUCCESS webhook accepted."
+
+# ============================================================
+# 26. Wait for PAYMENT SUCCESS
+# ============================================================
+
+print_section "26. Waiting for PAYMENT SUCCESS"
 
 PAYMENT_SUCCESS=false
 
@@ -1045,54 +1120,81 @@ fi
 echo
 echo "Payment succeeded."
 
+
 # ============================================================
-# 26. Verify TRIP PAYMENT PROJECTION
+# 27. Verify TRIP PAYMENT PROJECTION (WITH RETRIES)
 # ============================================================
 
-print_section "26. Verifying TRIP PAYMENT PROJECTION"
+print_section "27. Verifying TRIP PAYMENT PROJECTION"
 
-TRIP_PAYMENT_RESPONSE=$(
-    curl -sS \
-        -w '\n%{http_code}' \
-        -X GET \
-        "$BASE_URL/api/v1/trips/$TRIP_ID/payment" \
-        -H "Authorization: Bearer $RIDER_TOKEN"
-)
+MAX_RETRIES=15
+RETRY_INTERVAL=2
+PROJECTION_VERIFIED=false
 
-TRIP_PAYMENT_HTTP_STATUS="$(echo "$TRIP_PAYMENT_RESPONSE" | tail -n1)"
-TRIP_PAYMENT_BODY="$(echo "$TRIP_PAYMENT_RESPONSE" | sed '$d')"
+for ((attempt = 1; attempt <= MAX_RETRIES; attempt++)); do
 
-print_response \
-    "$TRIP_PAYMENT_HTTP_STATUS" \
-    "$TRIP_PAYMENT_BODY"
+    echo
+    echo "Attempt $attempt/$MAX_RETRIES: Checking Trip payment projection..."
 
-if [[ "$TRIP_PAYMENT_HTTP_STATUS" != 2* ]]; then
-    echo "ERROR: Trip payment projection could not be retrieved."
-    exit 1
-fi
+    TRIP_PAYMENT_RESPONSE=$(
+        curl -sS \
+            -w '\n%{http_code}' \
+            -X GET \
+            "$BASE_URL/api/v1/trips/$TRIP_ID/payment" \
+            -H "Authorization: Bearer $RIDER_TOKEN"
+    )
 
-TRIP_PAYMENT_ID="$(
-    extract_json "$TRIP_PAYMENT_BODY" paymentId
-)"
+    TRIP_PAYMENT_HTTP_STATUS="$(echo "$TRIP_PAYMENT_RESPONSE" | tail -n1)"
+    TRIP_PAYMENT_BODY="$(echo "$TRIP_PAYMENT_RESPONSE" | sed '$d')"
 
-TRIP_PAYMENT_STATUS="$(
-    extract_json "$TRIP_PAYMENT_BODY" status
-)"
+    print_response \
+        "$TRIP_PAYMENT_HTTP_STATUS" \
+        "$TRIP_PAYMENT_BODY"
 
-TRIP_PAYMENT_AMOUNT="$(
-    extract_json "$TRIP_PAYMENT_BODY" amount
-)"
+    if [[ "$TRIP_PAYMENT_HTTP_STATUS" == 2* ]]; then
 
-if [[ "$TRIP_PAYMENT_ID" != "$PAYMENT_ID" ]]; then
-    echo "ERROR: Trip payment projection paymentId does not match Payment Service."
-    echo "Payment Service: $PAYMENT_ID"
-    echo "Trip projection: $TRIP_PAYMENT_ID"
-    exit 1
-fi
+        TRIP_PAYMENT_ID="$(
+            extract_json "$TRIP_PAYMENT_BODY" paymentId
+        )"
 
-if [[ "$TRIP_PAYMENT_STATUS" != "SUCCESS" ]]; then
-    echo "ERROR: Trip payment projection is not SUCCESS."
-    echo "Status: $TRIP_PAYMENT_STATUS"
+        TRIP_PAYMENT_STATUS="$(
+            extract_json "$TRIP_PAYMENT_BODY" status
+        )"
+
+        TRIP_PAYMENT_AMOUNT="$(
+            extract_json "$TRIP_PAYMENT_BODY" amount
+        )"
+
+        # Verify that the projection refers to the expected payment.
+        if [[ "$TRIP_PAYMENT_ID" != "$PAYMENT_ID" ]]; then
+            echo "ERROR: Trip payment projection paymentId does not match Payment Service."
+            echo "Payment Service: $PAYMENT_ID"
+            echo "Trip projection: $TRIP_PAYMENT_ID"
+            exit 1
+        fi
+
+        # SUCCESS may arrive asynchronously through Kafka.
+        if [[ "$TRIP_PAYMENT_STATUS" == "SUCCESS" ]]; then
+            PROJECTION_VERIFIED=true
+            break
+        fi
+
+        echo "Projection status is '$TRIP_PAYMENT_STATUS'; waiting for SUCCESS..."
+
+    else
+        echo "Projection request returned HTTP $TRIP_PAYMENT_HTTP_STATUS; retrying..."
+    fi
+
+    if (( attempt < MAX_RETRIES )); then
+        sleep "$RETRY_INTERVAL"
+    fi
+done
+
+if [[ "$PROJECTION_VERIFIED" != true ]]; then
+    echo "ERROR: Trip payment projection did not reach SUCCESS within $((MAX_RETRIES * RETRY_INTERVAL)) seconds."
+    echo "Last HTTP status: $TRIP_PAYMENT_HTTP_STATUS"
+    echo "Last projection status: ${TRIP_PAYMENT_STATUS:-UNKNOWN}"
+    echo "Payment ID: $PAYMENT_ID"
     exit 1
 fi
 
@@ -1103,10 +1205,10 @@ echo "Amount     : $TRIP_PAYMENT_AMOUNT"
 echo "Status     : $TRIP_PAYMENT_STATUS"
 
 # ============================================================
-# 27. FINAL TRIP VERIFICATION
+# 28. FINAL TRIP VERIFICATION
 # ============================================================
 
-print_section "27. Final TRIP Verification"
+print_section "28. Final TRIP Verification"
 
 FINAL_TRIP_RESPONSE=$(
     curl -sS \
