@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
@@ -223,11 +224,13 @@ public class KafkaConsumerConfig {
 
         @Bean
         public ConcurrentKafkaListenerContainerFactory<String, RiderCreatedEvent> riderCreatedKafkaListenerContainerFactory(
-                        ConsumerFactory<String, RiderCreatedEvent> consumerFactory) {
+                        ConsumerFactory<String, RiderCreatedEvent> consumerFactory,
+                        DefaultErrorHandler errorHandler) {
 
                 ConcurrentKafkaListenerContainerFactory<String, RiderCreatedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
                 factory.setConsumerFactory(consumerFactory);
+                factory.setCommonErrorHandler(errorHandler);
                 enableObservation(factory);
 
                 return factory;
@@ -235,22 +238,26 @@ public class KafkaConsumerConfig {
 
         @Bean
         public ConcurrentKafkaListenerContainerFactory<String, DriverMatchRequestedEvent> driverMatchRequestedKafkaListenerContainerFactory(
-                        ConsumerFactory<String, DriverMatchRequestedEvent> consumerFactory) {
+                        ConsumerFactory<String, DriverMatchRequestedEvent> consumerFactory,
+                        DefaultErrorHandler errorHandler) {
 
                 ConcurrentKafkaListenerContainerFactory<String, DriverMatchRequestedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
                 factory.setConsumerFactory(consumerFactory);
+                factory.setCommonErrorHandler(errorHandler);
                 enableObservation(factory);
                 return factory;
         }
 
         @Bean
         public ConcurrentKafkaListenerContainerFactory<String, DriverRideAcceptedEvent> driverRideAcceptedKafkaListenerContainerFactory(
-                        ConsumerFactory<String, DriverRideAcceptedEvent> consumerFactory) {
+                        ConsumerFactory<String, DriverRideAcceptedEvent> consumerFactory,
+                        DefaultErrorHandler errorHandler) {
 
                 ConcurrentKafkaListenerContainerFactory<String, DriverRideAcceptedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
                 factory.setConsumerFactory(consumerFactory);
+                factory.setCommonErrorHandler(errorHandler);
                 enableObservation(factory);
 
                 return factory;
@@ -258,11 +265,13 @@ public class KafkaConsumerConfig {
 
         @Bean
         public ConcurrentKafkaListenerContainerFactory<String, DriverRideRejectedEvent> driverRideRejectedKafkaListenerContainerFactory(
-                        ConsumerFactory<String, DriverRideRejectedEvent> consumerFactory) {
+                        ConsumerFactory<String, DriverRideRejectedEvent> consumerFactory,
+                        DefaultErrorHandler errorHandler) {
 
                 ConcurrentKafkaListenerContainerFactory<String, DriverRideRejectedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
                 factory.setConsumerFactory(consumerFactory);
+                factory.setCommonErrorHandler(errorHandler);
                 enableObservation(factory);
                 
                 return factory;
@@ -270,11 +279,13 @@ public class KafkaConsumerConfig {
 
         @Bean
         public ConcurrentKafkaListenerContainerFactory<String, DriverRideExpiredEvent> driverRideExpiredKafkaListenerContainerFactory(
-                        ConsumerFactory<String, DriverRideExpiredEvent> consumerFactory) {
+                        ConsumerFactory<String, DriverRideExpiredEvent> consumerFactory,
+                        DefaultErrorHandler errorHandler) {
 
                 ConcurrentKafkaListenerContainerFactory<String, DriverRideExpiredEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
                 factory.setConsumerFactory(consumerFactory);
+                factory.setCommonErrorHandler(errorHandler);
                 enableObservation(factory);
 
                 return factory;
@@ -282,11 +293,13 @@ public class KafkaConsumerConfig {
 
         @Bean
         public ConcurrentKafkaListenerContainerFactory<String, DriverArrivedEvent> driverArrivedKafkaListenerContainerFactory(
-                        ConsumerFactory<String, DriverArrivedEvent> consumerFactory) {
+                        ConsumerFactory<String, DriverArrivedEvent> consumerFactory,
+                        DefaultErrorHandler errorHandler) {
 
                 ConcurrentKafkaListenerContainerFactory<String, DriverArrivedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
                 factory.setConsumerFactory(consumerFactory);
+                factory.setCommonErrorHandler(errorHandler);
                 enableObservation(factory);
 
                 return factory;
@@ -294,11 +307,13 @@ public class KafkaConsumerConfig {
 
         @Bean
         public ConcurrentKafkaListenerContainerFactory<String, DriverTripStartedEvent> driverTripStartedKafkaListenerContainerFactory(
-                        ConsumerFactory<String, DriverTripStartedEvent> consumerFactory) {
+                        ConsumerFactory<String, DriverTripStartedEvent> consumerFactory,
+                        DefaultErrorHandler errorHandler) {
 
                 ConcurrentKafkaListenerContainerFactory<String, DriverTripStartedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
                 factory.setConsumerFactory(consumerFactory);
+                factory.setCommonErrorHandler(errorHandler);
                 enableObservation(factory);
 
                 return factory;
@@ -306,11 +321,13 @@ public class KafkaConsumerConfig {
 
         @Bean
         public ConcurrentKafkaListenerContainerFactory<String, DriverTripCompletedEvent> driverTripCompletedKafkaListenerContainerFactory(
-                        ConsumerFactory<String, DriverTripCompletedEvent> consumerFactory) {
+                        ConsumerFactory<String, DriverTripCompletedEvent> consumerFactory,
+                        DefaultErrorHandler errorHandler) {
 
                 ConcurrentKafkaListenerContainerFactory<String, DriverTripCompletedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
                 factory.setConsumerFactory(consumerFactory);
+                factory.setCommonErrorHandler(errorHandler);
                 enableObservation(factory);
 
                 return factory;
@@ -318,11 +335,13 @@ public class KafkaConsumerConfig {
 
         @Bean
         public ConcurrentKafkaListenerContainerFactory<String, PaymentSucceededEvent> paymentSuccededKafkaListenerContainerFactory(
-                        ConsumerFactory<String, PaymentSucceededEvent> consumerFactory) {
+                        ConsumerFactory<String, PaymentSucceededEvent> consumerFactory,
+                        DefaultErrorHandler errorHandler) {
 
                 ConcurrentKafkaListenerContainerFactory<String, PaymentSucceededEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
                 factory.setConsumerFactory(consumerFactory);
+                factory.setCommonErrorHandler(errorHandler);
                 enableObservation(factory);
 
                 return factory;
@@ -330,11 +349,13 @@ public class KafkaConsumerConfig {
 
         @Bean
         public ConcurrentKafkaListenerContainerFactory<String, PaymentFailedEvent> paymentFailedKafkaListenerContainerFactory(
-                        ConsumerFactory<String, PaymentFailedEvent> consumerFactory) {
+                        ConsumerFactory<String, PaymentFailedEvent> consumerFactory,
+                        DefaultErrorHandler errorHandler) {
 
                 ConcurrentKafkaListenerContainerFactory<String, PaymentFailedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
                 factory.setConsumerFactory(consumerFactory);
+                factory.setCommonErrorHandler(errorHandler);
                 enableObservation(factory);
 
                 return factory;
@@ -342,11 +363,13 @@ public class KafkaConsumerConfig {
 
         @Bean
         public ConcurrentKafkaListenerContainerFactory<String, PaymentRefundedEvent> paymentRefundedKafkaListenerContainerFactory(
-                        ConsumerFactory<String, PaymentRefundedEvent> consumerFactory) {
+                        ConsumerFactory<String, PaymentRefundedEvent> consumerFactory,
+                        DefaultErrorHandler errorHandler) {
 
                 ConcurrentKafkaListenerContainerFactory<String, PaymentRefundedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
                 factory.setConsumerFactory(consumerFactory);
+                factory.setCommonErrorHandler(errorHandler);
                 enableObservation(factory);
 
                 return factory;
@@ -354,11 +377,13 @@ public class KafkaConsumerConfig {
 
         @Bean
         public ConcurrentKafkaListenerContainerFactory<String, PaymentCreatedEvent> paymentCreatedKafkaListenerContainerFactory(
-                        ConsumerFactory<String, PaymentCreatedEvent> consumerFactory) {
+                        ConsumerFactory<String, PaymentCreatedEvent> consumerFactory,
+                        DefaultErrorHandler errorHandler) {
 
                 ConcurrentKafkaListenerContainerFactory<String, PaymentCreatedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
                 factory.setConsumerFactory(consumerFactory);
+                factory.setCommonErrorHandler(errorHandler);
                 enableObservation(factory);
 
                 return factory;

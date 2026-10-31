@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
@@ -92,22 +93,26 @@ public class KafkaConsumerConfig {
 
         @Bean
         public ConcurrentKafkaListenerContainerFactory<String, TripCompletedEvent> tripCompletedKafkaListenerContainerFactory(
-                        ConsumerFactory<String, TripCompletedEvent> consumerFactory) {
+                        ConsumerFactory<String, TripCompletedEvent> consumerFactory,
+                        DefaultErrorHandler errorHandler) {
 
                 ConcurrentKafkaListenerContainerFactory<String, TripCompletedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
                 factory.setConsumerFactory(consumerFactory);
+                factory.setCommonErrorHandler(errorHandler);
                 enableObservation(factory);
                 return factory;
         }
 
         @Bean
         public ConcurrentKafkaListenerContainerFactory<String, RiderCreatedEvent> riderCreatedKafkaListenerContainerFactory(
-                        ConsumerFactory<String, RiderCreatedEvent> consumerFactory) {
+                        ConsumerFactory<String, RiderCreatedEvent> consumerFactory,
+                        DefaultErrorHandler errorHandler) {
 
                 ConcurrentKafkaListenerContainerFactory<String, RiderCreatedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
                 factory.setConsumerFactory(consumerFactory);
+                factory.setCommonErrorHandler(errorHandler);
                 enableObservation(factory);
 
                 return factory;

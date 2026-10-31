@@ -100,6 +100,7 @@ public class KafkaConsumerConfig {
                 ConcurrentKafkaListenerContainerFactory<String, TripRequestedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
                 factory.setConsumerFactory(consumerFactory);
+                factory.setCommonErrorHandler(errorHandler);
                 enableObservation(factory);
                 return factory;
         }
@@ -112,6 +113,7 @@ public class KafkaConsumerConfig {
                 ConcurrentKafkaListenerContainerFactory<String, TripRematchingEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
                 factory.setConsumerFactory(consumerFactory);
+                factory.setCommonErrorHandler(errorHandler);
                 enableObservation(factory);
 
                 return factory;

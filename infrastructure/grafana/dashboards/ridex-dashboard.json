@@ -4,18 +4,18 @@
   "metadata": {
     "name": "adfmnh6",
     "namespace": "default",
-    "uid": "50a92b86-2433-4af4-858f-1190920d068c",
-    "resourceVersion": "1791404309006993",
-    "generation": 53,
-    "creationTimestamp": "2026-10-06T19:47:29Z",
+    "uid": "704f199f-a8b0-4aee-9d22-dd1358c007a0",
+    "resourceVersion": "1792932746549981",
+    "generation": 18,
+    "creationTimestamp": "2026-10-25T12:43:40Z",
     "labels": {
-      "grafana.app/deprecatedInternalID": "4377355987263488"
+      "grafana.app/deprecatedInternalID": "2127873604952064"
     },
     "annotations": {
-      "grafana.app/createdBy": "user:fg0ci0zvmscg0e",
+      "grafana.app/createdBy": "user:cg2a9jj10jdogb",
       "grafana.app/saved-from-ui": "Grafana v13.2.3 (90ffed056f)",
-      "grafana.app/updatedBy": "user:fg0ci0zvmscg0e",
-      "grafana.app/updatedTimestamp": "2026-10-07T20:18:28Z"
+      "grafana.app/updatedBy": "user:cg2a9jj10jdogb",
+      "grafana.app/updatedTimestamp": "2026-10-25T12:52:26Z"
     }
   },
   "spec": {
@@ -62,7 +62,8 @@
                       "group": "prometheus",
                       "version": "v0",
                       "datasource": {
-                        "name": "bg0fq3wgcnmyod"
+                        "type": "prometheus",
+                        "uid": "PBFA97CFB590B2093"
                       },
                       "spec": {
                         "editorMode": "code",
@@ -145,7 +146,8 @@
                       "group": "prometheus",
                       "version": "v0",
                       "datasource": {
-                        "name": "bg0fq3wgcnmyod"
+                        "type": "prometheus",
+                        "uid": "PBFA97CFB590B2093"
                       },
                       "spec": {
                         "editorMode": "code",
@@ -279,7 +281,8 @@
                       "group": "prometheus",
                       "version": "v0",
                       "datasource": {
-                        "name": "bg0fq3wgcnmyod"
+                        "type": "prometheus",
+                        "uid": "PBFA97CFB590B2093"
                       },
                       "spec": {
                         "editorMode": "code",
@@ -393,7 +396,8 @@
                       "group": "prometheus",
                       "version": "v0",
                       "datasource": {
-                        "name": "bg0fq3wgcnmyod"
+                        "type": "prometheus",
+                        "uid": "PBFA97CFB590B2093"
                       },
                       "spec": {
                         "editorMode": "code",
@@ -532,7 +536,8 @@
                       "group": "prometheus",
                       "version": "v0",
                       "datasource": {
-                        "name": "bg0fq3wgcnmyod"
+                        "type": "prometheus",
+                        "uid": "PBFA97CFB590B2093"
                       },
                       "spec": {
                         "editorMode": "code",
@@ -647,7 +652,8 @@
                       "group": "prometheus",
                       "version": "v0",
                       "datasource": {
-                        "name": "bg0fq3wgcnmyod"
+                        "type": "prometheus",
+                        "uid": "PBFA97CFB590B2093"
                       },
                       "spec": {
                         "editorMode": "code",
@@ -766,7 +772,8 @@
                       "group": "prometheus",
                       "version": "v0",
                       "datasource": {
-                        "name": "bg0fq3wgcnmyod"
+                        "type": "prometheus",
+                        "uid": "PBFA97CFB590B2093"
                       },
                       "spec": {
                         "editorMode": "code",
@@ -881,7 +888,8 @@
                       "group": "prometheus",
                       "version": "v0",
                       "datasource": {
-                        "name": "bg0fq3wgcnmyod"
+                        "type": "prometheus",
+                        "uid": "PBFA97CFB590B2093"
                       },
                       "spec": {
                         "editorMode": "code",
@@ -996,7 +1004,8 @@
                       "group": "prometheus",
                       "version": "v0",
                       "datasource": {
-                        "name": "bg0fq3wgcnmyod"
+                        "type": "prometheus",
+                        "uid": "PBFA97CFB590B2093"
                       },
                       "spec": {
                         "editorMode": "code",
@@ -1115,7 +1124,8 @@
                       "group": "prometheus",
                       "version": "v0",
                       "datasource": {
-                        "name": "bg0fq3wgcnmyod"
+                        "type": "prometheus",
+                        "uid": "PBFA97CFB590B2093"
                       },
                       "spec": {
                         "editorMode": "code",
@@ -1230,7 +1240,8 @@
                       "group": "prometheus",
                       "version": "v0",
                       "datasource": {
-                        "name": "bg0fq3wgcnmyod"
+                        "type": "prometheus",
+                        "uid": "PBFA97CFB590B2093"
                       },
                       "spec": {
                         "editorMode": "code",
@@ -1345,7 +1356,8 @@
                       "group": "prometheus",
                       "version": "v0",
                       "datasource": {
-                        "name": "bg0fq3wgcnmyod"
+                        "type": "prometheus",
+                        "uid": "PBFA97CFB590B2093"
                       },
                       "spec": {
                         "editorMode": "code",
@@ -1464,7 +1476,8 @@
                       "group": "prometheus",
                       "version": "v0",
                       "datasource": {
-                        "name": "bg0fq3wgcnmyod"
+                        "type": "prometheus",
+                        "uid": "PBFA97CFB590B2093"
                       },
                       "spec": {
                         "editorMode": "code",
@@ -1579,7 +1592,8 @@
                       "group": "prometheus",
                       "version": "v0",
                       "datasource": {
-                        "name": "bg0fq3wgcnmyod"
+                        "type": "prometheus",
+                        "uid": "PBFA97CFB590B2093"
                       },
                       "spec": {
                         "editorMode": "code",
@@ -1702,7 +1716,8 @@
                       "group": "prometheus",
                       "version": "v0",
                       "datasource": {
-                        "name": "bg0fq3wgcnmyod"
+                        "type": "prometheus",
+                        "uid": "PBFA97CFB590B2093"
                       },
                       "spec": {
                         "editorMode": "code",
@@ -1821,7 +1836,8 @@
                       "group": "prometheus",
                       "version": "v0",
                       "datasource": {
-                        "name": "bg0fq3wgcnmyod"
+                        "type": "prometheus",
+                        "uid": "PBFA97CFB590B2093"
                       },
                       "spec": {
                         "editorMode": "code",
@@ -1940,7 +1956,8 @@
                       "group": "prometheus",
                       "version": "v0",
                       "datasource": {
-                        "name": "bg0fq3wgcnmyod"
+                        "type": "prometheus",
+                        "uid": "PBFA97CFB590B2093"
                       },
                       "spec": {
                         "editorMode": "code",
@@ -2277,7 +2294,7 @@
       "timezone": "browser",
       "from": "now-6h",
       "to": "now",
-      "autoRefresh": "5s",
+      "autoRefresh": "30s",
       "autoRefreshIntervals": [
         "5s",
         "10s",
