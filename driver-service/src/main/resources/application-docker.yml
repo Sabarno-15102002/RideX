@@ -26,3 +26,8 @@ eureka:
 
   instance:
     prefer-ip-address: true
+
+ridex:
+  kafka:
+    dlt-replay:
+      enabled: false
