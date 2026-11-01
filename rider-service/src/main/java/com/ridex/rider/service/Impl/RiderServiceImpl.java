@@ -2,6 +2,8 @@ package com.ridex.rider.service.Impl;
 
 import java.util.UUID;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +24,11 @@ public class RiderServiceImpl implements RiderService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(
+        cacheNames = "riderProfile",
+        key = "#userId",
+        unless = "#result == null"
+    )
     public RiderResponse getMyProfile(UUID userId) {
 
         Rider rider = riderRepository
@@ -36,6 +43,10 @@ public class RiderServiceImpl implements RiderService {
 
     @Override
     @Transactional
+    @CacheEvict(
+        cacheNames = "riderProfile",
+        key = "#userId"
+    )
     public RiderResponse updateMyProfile(
             UUID userId,
             UpdateRiderRequest request

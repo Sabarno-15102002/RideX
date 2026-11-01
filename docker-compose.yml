@@ -370,10 +370,9 @@ services:
   redis:
     image: redis:7.4
     container_name: ridex-redis
-
+    command: ["redis-server", "--appendonly", "yes"]
     ports:
       - "6379:6379"
-
     volumes:
       - redis_data:/data
 

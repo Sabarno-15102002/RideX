@@ -63,6 +63,8 @@ public class RiderRegistrationServiceImpl implements RiderRegistrationService {
 
         riderRepository.save(rider);
 
+        log.info("Rider created with user ID: {}", rider.getUserId());
+
         processedEventRepository.save(
                 ProcessedEvent.builder()
                         .eventId(event.eventId())

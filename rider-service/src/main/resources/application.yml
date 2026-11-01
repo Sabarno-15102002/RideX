@@ -28,6 +28,18 @@ spring:
       
       properties:
         spring.json.trusted.packages: "com.ridex.rider.event"
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 2s
+
+  cache:
+    type: redis
+    redis:
+      time-to-live: 10m
+      cache-null-values: false
+      key-prefix: "ridex:"
 
 server:
   port: ${SERVER_PORT:8082}
