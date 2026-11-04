@@ -2,7 +2,9 @@ package com.ridex.trip.service.util;
 
 import java.util.UUID;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ridex.trip.dto.PaymentStatus;
 import com.ridex.trip.dto.response.TripPaymentResponse;
@@ -10,6 +12,7 @@ import com.ridex.trip.entity.TripPayment;
 import com.ridex.trip.event.event.PaymentCreatedEvent;
 import com.ridex.trip.exception.IllegalOperationException;
 import com.ridex.trip.repository.TripPaymentRepository;
+
 
 @Service
 public class TripPaymentQueryService {
@@ -20,6 +23,11 @@ public class TripPaymentQueryService {
                 this.repository = repository;
         }
 
+        @Cacheable(
+                cacheNames = "tripPayment",
+                key = "#tripId",
+                unless = "#result == null"
+        )
         public TripPaymentResponse getPaymentForTrip(
                         UUID tripId,
                         UUID authenticatedRiderId) {
@@ -42,6 +50,7 @@ public class TripPaymentQueryService {
                                 payment.getRefundedAt());
         }
 
+        @Transactional
         public void createPaymentForTrip(PaymentCreatedEvent event) {
                 TripPayment payment = new TripPayment(
                                 event.tripId(),

@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ridex.rider.config.SecurityUtils;
+import com.ridex.rider.dto.request.UpdateRiderRequest;
 import com.ridex.rider.dto.response.RiderResponse;
-import com.ridex.rider.dto.response.UpdateRiderRequest;
 import com.ridex.rider.service.RiderService;
 
 import jakarta.validation.Valid;

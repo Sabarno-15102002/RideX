@@ -221,7 +221,7 @@ for ((attempt=1; attempt<=MAX_ATTEMPTS; attempt++)); do
         curl -sS \
             -w '\n%{http_code}' \
             -X GET \
-            "$BASE_URL/api/v1/drivers/" \
+            "$BASE_URL/api/v1/drivers/me" \
             -H "Authorization: Bearer $DRIVER_TOKEN"
     )
 

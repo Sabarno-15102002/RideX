@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.geo.Distance;
 import org.springframework.data.geo.GeoResults;
 import org.springframework.data.geo.Metrics;
@@ -99,6 +100,11 @@ public class DriverLocationServiceImpl implements DriverLocationService {
         }
 
         @Override
+        @Cacheable(
+                cacheNames = "nearbyDrivers",
+                key = "#latitude + ':' + #longitude + ':' + #radiusKm",
+                unless = "#result == null || #result.isEmpty()"
+        )
         public List<NearbyDriverResponse> findNearbyDrivers(
                         double latitude,
                         double longitude,

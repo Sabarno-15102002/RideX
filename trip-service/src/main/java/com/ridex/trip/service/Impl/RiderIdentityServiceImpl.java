@@ -2,6 +2,7 @@ package com.ridex.trip.service.Impl;
 
 import java.util.UUID;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,6 +48,11 @@ public class RiderIdentityServiceImpl implements RiderIdentityService {
     }
 
     @Override
+    @Cacheable(
+            cacheNames = "riderIdentity",
+            key = "#userId",
+            unless = "#result == null"
+    )
     public UUID getRiderIdByUserId(UUID userId) {
         RiderIdentity riderIdentity = riderIdentityRepository.findById(userId).orElseThrow(() -> new RuntimeException("Mapping Not found for the user id:" + userId));
 

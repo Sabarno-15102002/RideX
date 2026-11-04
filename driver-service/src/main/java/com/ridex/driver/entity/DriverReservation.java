@@ -3,8 +3,6 @@ package com.ridex.driver.entity;
 import java.time.Instant;
 import java.util.UUID;
 
-
-
 import com.ridex.driver.utilities.ReservationStatus;
 
 import jakarta.persistence.Column;
@@ -17,7 +15,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -25,15 +22,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(
-        name = "driver_reservations",
-        uniqueConstraints = {
-                @UniqueConstraint(
-                        name = "uk_driver_reservations_trip_id",
-                        columnNames = "trip_id"
-                )
-        }
-)
+@Table(name = "driver_reservations")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -48,7 +37,7 @@ public class DriverReservation {
     @Column(name = "driver_id", nullable = false)
     private UUID driverId;
 
-    @Column(name = "trip_id", nullable = false, unique = true)
+    @Column(name = "trip_id", nullable = false)
     private UUID tripId;
 
     @Enumerated(EnumType.STRING)

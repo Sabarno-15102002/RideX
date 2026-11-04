@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ridex.driver.config.SecurityUtils;
 import com.ridex.driver.dto.request.DriverOnboardingRequest;
+import com.ridex.driver.dto.request.UpdateDriverRequest;
 import com.ridex.driver.dto.request.UpdateDriverStatusRequest;
+import com.ridex.driver.dto.request.UpdateVehicleRequest;
 import com.ridex.driver.dto.response.DriverResponse;
 import com.ridex.driver.dto.response.VehicleResponse;
 import com.ridex.driver.service.DriverOnboardingService;
@@ -42,7 +44,7 @@ public class DriverController {
                 return ResponseEntity.noContent().build();
         }
 
-        @GetMapping("/")
+        @GetMapping("/me")
         public ResponseEntity<DriverResponse> getDriver() {
                 UUID userId = SecurityUtils.getCurrentUserId();
                 return ResponseEntity.ok(
@@ -60,12 +62,34 @@ public class DriverController {
                                                 request.status()));
         }
 
+        @PutMapping("/me")
+        public ResponseEntity<DriverResponse> updateMyProfile(
+            @Valid @RequestBody UpdateDriverRequest request
+        ) {
+
+                return ResponseEntity.ok(
+                        driverService.updateMyProfile(
+                                SecurityUtils.getCurrentUserId(),
+                                request
+                        )
+                );
+        }
+
         @GetMapping("/{driverId}/vehicle")
         public ResponseEntity<VehicleResponse> getVehicle(
                         @PathVariable UUID driverId) {
 
                 return ResponseEntity.ok(
                                 driverService.getVehicle(driverId));
+        }
+
+        @PutMapping("/{driverId}/vehicle")
+        public ResponseEntity<VehicleResponse> updateVehicle(
+                        @PathVariable UUID driverId,
+                        @Valid @RequestBody UpdateVehicleRequest request) {
+
+                return ResponseEntity.ok(
+                                driverService.updateVehicle(driverId, request));
         }
 
         @PostMapping("/me/trips/{tripId}/accept")

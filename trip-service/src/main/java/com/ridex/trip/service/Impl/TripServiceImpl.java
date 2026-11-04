@@ -4,6 +4,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.UUID;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -120,6 +122,10 @@ public class TripServiceImpl implements TripService {
 
         @Override
         @Transactional
+        @CacheEvict(
+                cacheNames = "tripStatus",
+                key = "#event.tripId()"
+        )
         public void assignDriver(DriverMatchRequestedEvent event) {
 
                 if (processedEventRepository.existsById(event.eventId())) {
@@ -150,6 +156,10 @@ public class TripServiceImpl implements TripService {
 
         @Override
         @Transactional
+        @CacheEvict(
+                cacheNames = "tripStatus",
+                key = "#event.tripId()"
+        )
         public void handleDriverRideAccepted(DriverRideAcceptedEvent event) {
 
                 if (processedEventRepository.existsById(event.eventId())) {
@@ -182,6 +192,10 @@ public class TripServiceImpl implements TripService {
 
         @Override
         @Transactional
+        @CacheEvict(
+                cacheNames = "tripStatus",
+                key = "#event.tripId()"
+        )
         public void handleDriverRideRejected(DriverRideRejectedEvent event) {
 
                 if (processedEventRepository.existsById(event.eventId())) {
@@ -230,6 +244,10 @@ public class TripServiceImpl implements TripService {
 
         @Override
         @Transactional
+        @CacheEvict(
+                cacheNames = "tripStatus",
+                key = "#event.tripId()"
+        )
         public void handleDriverRideExpired(DriverRideExpiredEvent event) {
 
                 if (processedEventRepository.existsById(event.eventId())) {
@@ -281,6 +299,10 @@ public class TripServiceImpl implements TripService {
 
         @Override
         @Transactional
+        @CacheEvict(
+                cacheNames = "tripStatus",
+                key = "#event.tripId()"
+        )
         public void handleDriverArrived(DriverArrivedEvent event) {
 
                 if (processedEventRepository.existsById(event.eventId())) {
@@ -315,6 +337,10 @@ public class TripServiceImpl implements TripService {
 
         @Override
         @Transactional
+        @CacheEvict(
+                cacheNames = "tripStatus",
+                key = "#event.tripId()"
+        )
         public void handleDriverTripStarted(DriverTripStartedEvent event) {
 
                 if (processedEventRepository.existsById(event.eventId())) {
@@ -350,6 +376,10 @@ public class TripServiceImpl implements TripService {
 
         @Override
         @Transactional
+        @CacheEvict(
+                cacheNames = "tripStatus",
+                key = "#event.tripId()"
+        )
         public void handleDriverTripCompleted(
                         DriverTripCompletedEvent event) {
 
@@ -405,6 +435,11 @@ public class TripServiceImpl implements TripService {
         }
 
         @Override
+        @Cacheable(
+                cacheNames = "tripStatus",
+                key = "#tripId",
+                unless = "#result == null"
+        )
         public TripStatusResponse getTripStatus(UUID tripId) {
                 Trip trip = tripRepository.findById(tripId)
                                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -414,6 +449,11 @@ public class TripServiceImpl implements TripService {
         }
 
         @Override
+        @Cacheable(
+                cacheNames = "tripDetails",
+                key = "#tripId",
+                unless = "#result == null"
+        )
         public TripResponse getTrip(UUID userId, UUID tripId) {
                 RiderIdentity riderIdentity = riderIdentityRepository.findById(userId)
                                 .orElseThrow(() -> new ResourceNotFoundException(

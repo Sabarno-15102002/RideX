@@ -7,8 +7,8 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ridex.rider.dto.request.UpdateRiderRequest;
 import com.ridex.rider.dto.response.RiderResponse;
-import com.ridex.rider.dto.response.UpdateRiderRequest;
 import com.ridex.rider.entity.Rider;
 import com.ridex.rider.exception.RiderNotFoundException;
 import com.ridex.rider.repository.RiderRepository;

@@ -39,9 +39,19 @@ public class DriverReservationServiceImpl implements DriverReservationService {
 
         @Override
         @Transactional
-        public boolean reserveDriver(
-                        UUID driverId,
-                        UUID tripId) {
+        public boolean reserveDriver(UUID driverId, UUID tripId) {
+
+                // Idempotency: if this trip already has an active reservation,
+                // return true only when it belongs to this driver.
+                Optional<DriverReservation> existingReservation = reservationRepository.findByTripIdAndStatus(
+                                tripId,
+                                ReservationStatus.ACTIVE);
+
+                if (existingReservation.isPresent()) {
+                        return existingReservation.get()
+                                        .getDriverId()
+                                        .equals(driverId);
+                }
 
                 Driver driver = driverRepository.findById(driverId)
                                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -51,51 +61,41 @@ public class DriverReservationServiceImpl implements DriverReservationService {
                         return false;
                 }
 
-                Optional<DriverReservation> existingReservation = reservationRepository.findByTripIdAndStatus(tripId, ReservationStatus.ACTIVE);
+                Instant now = Instant.now();
+                Instant expiresAt = now.plus(RESERVATION_DURATION);
 
-                if (existingReservation.isPresent()) {
+                int inserted = reservationRepository.tryCreateActiveReservation(
+                                UUID.randomUUID(),
+                                driverId,
+                                tripId,
+                                expiresAt);
 
-                        DriverReservation reservation = existingReservation.get();
-
-                        // Same driver already reserved for this trip.
-                        if (reservation.getDriverId().equals(driverId)
-                                        && reservation.getStatus() == ReservationStatus.ACTIVE) {
-
-                                log.info(
-                                                "Driver already reserved for trip: driverId={}, tripId={}",
-                                                driverId,
-                                                tripId);
-
-                                return true;
-                        }
-
-                        // Another driver already owns this trip.
+                if (inserted == 1) {
                         log.info(
-                                        "Trip already has a reservation: tripId={}, existingDriverId={}",
-                                        tripId,
-                                        reservation.getDriverId());
+                                        "Driver reserved successfully: driverId={}, tripId={}",
+                                        driverId,
+                                        tripId);
 
-                        return false;
+                        return true;
                 }
 
-                DriverReservation reservation = DriverReservation.builder()
-                                .driverId(driverId)
-                                .tripId(tripId)
-                                .status(ReservationStatus.ACTIVE)
-                                .expiresAt(
-                                        Instant.now()
-                                        .plus(RESERVATION_DURATION))
-                                .build();
+                // A concurrent request won the reservation race.
+                // Re-read the active reservation to handle the same-driver retry.
+                Optional<DriverReservation> winner = reservationRepository.findByTripIdAndStatus(
+                                tripId,
+                                ReservationStatus.ACTIVE);
 
-                reservationRepository.save(reservation);
+                if (winner.isPresent()
+                                && winner.get().getDriverId().equals(driverId)) {
+                        return true;
+                }
 
                 log.info(
-                                "Driver reserved successfully: driverId={}, tripId={}",
+                                "Reservation conflict: driverId={}, tripId={}",
                                 driverId,
                                 tripId);
 
-                return true;
-
+                return false;
         }
 
         @Override
@@ -103,9 +103,13 @@ public class DriverReservationServiceImpl implements DriverReservationService {
         public void acceptReservation(UUID driverId, UUID tripId) {
 
                 DriverReservation reservation = reservationRepository
-                                .findByTripIdForUpdate(tripId)
-                                .orElseThrow(() -> new ResourceNotFoundException(
-                                                "Reservation not found"));
+                                                        .findByTripIdAndStatusForUpdate(
+                                                                tripId,
+                                                                ReservationStatus.ACTIVE
+                                                        )
+                                                        .orElseThrow(() -> new ResourceNotFoundException(
+                                                                "Active reservation not found"
+                                                        ));
 
                 // 1. Verify ownership
                 if (!reservation.getDriverId().equals(driverId)) {
@@ -169,9 +173,13 @@ public class DriverReservationServiceImpl implements DriverReservationService {
         public void releaseReservation(UUID driverId, UUID tripId) {
 
                 DriverReservation reservation = reservationRepository
-                                .findByTripIdForUpdate(tripId)
-                                .orElseThrow(() -> new ResourceNotFoundException(
-                                                "Reservation not found"));
+                                                        .findByTripIdAndStatusForUpdate(
+                                                                tripId,
+                                                                ReservationStatus.ACTIVE
+                                                        )
+                                                        .orElseThrow(() -> new ResourceNotFoundException(
+                                                                "Active reservation not found"
+                                                        ));
 
                 if (!reservation.getDriverId().equals(driverId)) {
                         throw new ResourceNotFoundException(
@@ -236,8 +244,9 @@ public class DriverReservationServiceImpl implements DriverReservationService {
         @Override
         public DriverReservation findDriverReservation(UUID tripId) {
                 return reservationRepository
-                                .findByTripIdForUpdate(tripId)
-                                .orElseThrow(() -> new ResourceNotFoundException(
-                                                "Reservation not found"));
+                        .findByTripId(tripId)
+                        .orElseThrow(() -> new ResourceNotFoundException(
+                                "Reservation not found"
+                        ));
         }
 }

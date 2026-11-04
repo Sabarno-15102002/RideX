@@ -54,11 +54,6 @@ public class Vehicle {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    /**
-     * Driver Service's Driver ID.
-     *
-     * No JPA relationship is used here intentionally.
-     */
     @Column(name = "driver_id", nullable = false)
     private UUID driverId;
 

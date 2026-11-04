@@ -1,4 +1,4 @@
-package com.ridex.rider.dto.response;
+package com.ridex.rider.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

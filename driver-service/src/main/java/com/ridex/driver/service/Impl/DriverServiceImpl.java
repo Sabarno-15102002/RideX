@@ -3,9 +3,13 @@ package com.ridex.driver.service.Impl;
 import java.time.Instant;
 import java.util.UUID;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ridex.driver.dto.request.UpdateDriverRequest;
+import com.ridex.driver.dto.request.UpdateVehicleRequest;
 import com.ridex.driver.dto.response.DriverResponse;
 import com.ridex.driver.dto.response.VehicleResponse;
 import com.ridex.driver.entity.Driver;
@@ -31,6 +35,11 @@ public class DriverServiceImpl implements DriverService {
         private final OutboxEventService outboxEventService;
 
         @Override
+        @Cacheable(
+                cacheNames = "driverProfile",
+                key = "#userId",
+                unless = "#result == null"
+        )
         public DriverResponse getDriver(UUID userId) {
 
                 Driver driver = driverRepository.findByUserId(userId)
@@ -103,6 +112,11 @@ public class DriverServiceImpl implements DriverService {
         }
 
         @Override
+        @Cacheable(
+                cacheNames = "vehicleDetails",
+                key = "#driverId",
+                unless = "#result == null"
+        )
         public VehicleResponse getVehicle(UUID driverId) {
 
                 // First verify that the driver exists
@@ -114,6 +128,80 @@ public class DriverServiceImpl implements DriverService {
                 Vehicle vehicle = vehicleRepository.findFirstByDriverId(driverId)
                                 .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Vehicle not found for driver: " + driverId));
+
+                return new VehicleResponse(
+                                vehicle.getId(),
+                                vehicle.getDriverId(),
+                                vehicle.getRegistrationNumber(),
+                                vehicle.getMake(),
+                                vehicle.getModel(),
+                                vehicle.getColor(),
+                                vehicle.getVehicleType());
+        }
+
+        @Override
+        @CacheEvict(
+                cacheNames = "driverProfile",
+                key = "#userId"
+        )
+        public DriverResponse updateMyProfile(UUID userId, UpdateDriverRequest request) {
+                Driver driver = driverRepository.findByUserId(userId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Driver not found: " + userId));
+
+                // Update the driver's profile with the new information
+                driver.setName(request.name());
+
+                // Save the updated driver information
+                driverRepository.save(driver);
+
+                return new DriverResponse(
+                                driver.getId(),
+                                driver.getUserId(),
+                                driver.getName(),
+                                driver.getLicenseNumber(),
+                                driver.getRating(),
+                                driver.getStatus());
+        }
+
+        @Override
+        @CacheEvict(
+                cacheNames = "vehicleDetails",
+                key = "#driverId"
+        )
+        public VehicleResponse updateVehicle(UUID driverId, UpdateVehicleRequest request) {
+                if (!driverRepository.existsById(driverId)) {
+                        throw new ResourceNotFoundException(
+                                        "Driver not found: " + driverId);
+                }
+
+                Vehicle vehicle = vehicleRepository.findFirstByDriverId(driverId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Vehicle not found for driver: " + driverId));
+
+                // Update the vehicle information with the new details
+                if (request.registrationNumber() != null) {
+                        vehicle.setRegistrationNumber(request.registrationNumber());
+                }
+
+                if (request.make() != null) {
+                        vehicle.setMake(request.make());
+                }
+
+                if (request.model() != null) {
+                        vehicle.setModel(request.model());
+                }
+
+                if (request.color() != null) {
+                        vehicle.setColor(request.color());
+                }
+
+                if (request.vehicleType() != null) {
+                        vehicle.setVehicleType(request.vehicleType());
+                }
+
+                // Save the updated vehicle information
+                vehicleRepository.save(vehicle);
 
                 return new VehicleResponse(
                                 vehicle.getId(),
