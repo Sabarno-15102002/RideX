@@ -138,6 +138,21 @@ public class TripServiceImpl implements TripService {
 
                 if (trip.getStatus() != TripStatus.MATCHING
                                 && trip.getStatus() != TripStatus.REQUESTED) {
+
+                        log.info(
+                                "Ignoring stale driver assignment event: eventId={}, tripId={}, status={}",
+                                event.eventId(),
+                                event.tripId(),
+                                trip.getStatus()
+                        );
+
+                        processedEventRepository.save(
+                                new ProcessedEvent(
+                                        event.eventId(),
+                                        Instant.now()
+                                )
+                        );
+
                         return;
                 }
 
@@ -448,10 +463,9 @@ public class TripServiceImpl implements TripService {
                 return new TripStatusResponse(trip.getStatus());
         }
 
-        @Override
         @Cacheable(
                 cacheNames = "tripDetails",
-                key = "#tripId",
+                key = "#userId + ':' + #tripId",
                 unless = "#result == null"
         )
         public TripResponse getTrip(UUID userId, UUID tripId) {

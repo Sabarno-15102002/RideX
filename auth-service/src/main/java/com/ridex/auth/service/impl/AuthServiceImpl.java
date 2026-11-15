@@ -57,6 +57,10 @@ public class AuthServiceImpl implements AuthService {
                                         "Phone number is already registered");
                 }
 
+                if (request.role() == UserRole.ADMIN) {
+                        throw new IllegalArgumentException("Admin registration is not allowed");
+                }
+
                 User user = User.builder()
                                 .id(UUID.randomUUID())
                                 .name(request.name())

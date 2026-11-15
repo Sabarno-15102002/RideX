@@ -53,7 +53,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         }
 
         @Override
-        @Transactional
+        @Transactional(noRollbackFor = InvalidRefreshTokenException.class)
         public GeneratedRefreshToken rotate(
                         RefreshToken currentToken,
                         User user) {

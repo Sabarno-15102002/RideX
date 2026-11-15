@@ -2,6 +2,7 @@ package com.ridex.trip.service.util;
 
 import java.util.UUID;
 
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +26,7 @@ public class TripPaymentQueryService {
 
         @Cacheable(
                 cacheNames = "tripPayment",
-                key = "#tripId",
+                key = "#p0 + ':' + #p1",
                 unless = "#result == null"
         )
         public TripPaymentResponse getPaymentForTrip(
@@ -50,6 +51,10 @@ public class TripPaymentQueryService {
                                 payment.getRefundedAt());
         }
 
+        @CacheEvict(
+                cacheNames = "tripPayment",
+                key = "#p0.tripId() + ':' + #p0.riderId()"
+        )
         @Transactional
         public void createPaymentForTrip(PaymentCreatedEvent event) {
                 TripPayment payment = new TripPayment(

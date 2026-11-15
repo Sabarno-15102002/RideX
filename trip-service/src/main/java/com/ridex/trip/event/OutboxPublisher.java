@@ -65,8 +65,9 @@ public class OutboxPublisher {
                 break;
         
             default:
-                topic = TRIP_REQUESTED_TOPIC;
-                break;
+                throw new IllegalArgumentException(
+                    "Unsupported outbox event type: " + eventType
+                );
         }
 
         try {

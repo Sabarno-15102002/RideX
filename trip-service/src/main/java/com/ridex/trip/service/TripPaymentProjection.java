@@ -1,5 +1,6 @@
 package com.ridex.trip.service;
 
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,79 +15,75 @@ import com.ridex.trip.repository.TripPaymentRepository;
 
 import lombok.RequiredArgsConstructor;
 
-
 @Service
-@RequiredArgsConstructor 
+@RequiredArgsConstructor
 public class TripPaymentProjection {
 
-    private final TripPaymentRepository tripPaymentRepository;
+        private final TripPaymentRepository tripPaymentRepository;
 
-    @Transactional
-    public void project(PaymentSucceededEvent event) {
-        TripPayment payment = tripPaymentRepository.findById(event.tripId())
-                .orElseGet(() -> new TripPayment(
-                        event.tripId(),
-                        event.paymentId(),
-                        event.riderId(),
-                        event.amount(),
-                        event.currency(),
-                        PaymentStatus.SUCCESS,
-                        event.paidAt()
-                ));
+        @CacheEvict(cacheNames = "tripPayment", key = "#event.tripId() + ':' + #event.riderId()")
+        @Transactional
+        public void project(PaymentSucceededEvent event) {
 
-        if (payment.getStatus() == PaymentStatus.SUCCESS
-                || payment.getStatus() == PaymentStatus.REFUNDED) {
-            return;
+                TripPayment payment = tripPaymentRepository.findById(event.tripId())
+                                .orElseGet(() -> new TripPayment(
+                                                event.tripId(),
+                                                event.paymentId(),
+                                                event.riderId(),
+                                                event.amount(),
+                                                event.currency(),
+                                                PaymentStatus.PENDING,
+                                                event.paidAt()));
+
+                if (payment.getStatus() == PaymentStatus.SUCCESS
+                                || payment.getStatus() == PaymentStatus.REFUNDED) {
+                        return;
+                }
+
+                payment.markSuccess(event.paidAt());
+
+                tripPaymentRepository.save(payment);
         }
 
-        payment.markSuccess(event.paidAt());
-        tripPaymentRepository.save(payment);
-    }
+        @CacheEvict(cacheNames = "tripPayment", key = "#event.tripId() + ':' + #event.riderId()")
+        @Transactional
+        public void project(PaymentFailedEvent event) {
+                TripPayment payment = tripPaymentRepository.findById(event.tripId())
+                                .orElseGet(() -> new TripPayment(
+                                                event.tripId(),
+                                                event.paymentId(),
+                                                event.riderId(),
+                                                event.amount(),
+                                                event.currency(),
+                                                PaymentStatus.FAILED,
+                                                event.failedAt()));
 
-    @Transactional
-    public void project(PaymentFailedEvent event) {
-        TripPayment payment = tripPaymentRepository.findById(event.tripId())
-                .orElseGet(() -> new TripPayment(
-                        event.tripId(),
-                        event.paymentId(),
-                        event.riderId(),
-                        event.amount(),
-                        event.currency(),
-                        PaymentStatus.FAILED,
-                        event.failedAt()
-                ));
+                if (payment.getStatus() == PaymentStatus.SUCCESS
+                                || payment.getStatus() == PaymentStatus.REFUNDED) {
+                        return;
+                }
 
-        if (payment.getStatus() == PaymentStatus.SUCCESS
-                || payment.getStatus() == PaymentStatus.REFUNDED) {
-            return;
+                payment.markFailed(event.failedAt());
+                tripPaymentRepository.save(payment);
         }
 
-        payment.markFailed(event.failedAt());
-        tripPaymentRepository.save(payment);
-    }
+        @CacheEvict(cacheNames = "tripPayment", key = "#p0.tripId() + ':' + #p0.riderId()")
+        @Transactional
+        public void project(PaymentRefundedEvent event) {
+                TripPayment payment = tripPaymentRepository.findById(event.tripId())
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Payment not found for trip: " + event.tripId()));
 
-    @Transactional
-    public void project(PaymentRefundedEvent event) {
-        TripPayment payment = tripPaymentRepository.findById(event.tripId())
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Payment projection not found for trip: "
-                                        + event.tripId()
-                        )
-                );
+                if (payment.getStatus() == PaymentStatus.REFUNDED) {
+                        return;
+                }
 
-        if (payment.getStatus() == PaymentStatus.REFUNDED) {
-            return;
+                if (payment.getStatus() != PaymentStatus.SUCCESS) {
+                        throw new IllegalOperationException(
+                                        "Cannot refund payment with status: " + payment.getStatus());
+                }
+
+                payment.markRefunded(event.refundedAt());
+                tripPaymentRepository.save(payment);
         }
-
-        if (payment.getStatus() != PaymentStatus.SUCCESS) {
-            throw new IllegalOperationException(
-                    "Cannot refund payment in status: "
-                            + payment.getStatus()
-            );
-        }
-
-        payment.markRefunded(event.refundedAt());
-        tripPaymentRepository.save(payment);
-    }
 }
