@@ -99,7 +99,7 @@ public class DriverReservationServiceImpl implements DriverReservationService {
         }
 
         @Override
-        @Transactional
+        @Transactional(noRollbackFor = ResourceNotFoundException.class)
         public void acceptReservation(UUID driverId, UUID tripId) {
 
                 DriverReservation reservation = reservationRepository
@@ -117,13 +117,7 @@ public class DriverReservationServiceImpl implements DriverReservationService {
                                         "Driver does not own this reservation");
                 }
 
-                // 2. Verify reservation state
-                if (reservation.getStatus() != ReservationStatus.ACTIVE) {
-                        throw new ResourceNotFoundException(
-                                        "Reservation is not active");
-                }
-
-                // 3. Verify reservation hasn't expired
+                // 2. Verify reservation hasn't expired
                 Instant now = Instant.now();
 
                 if (reservation.getExpiresAt().isBefore(now)) {
@@ -136,26 +130,26 @@ public class DriverReservationServiceImpl implements DriverReservationService {
                                         "Reservation has expired");
                 }
 
-                // 4. Load driver
+                // 3. Load driver
                 Driver driver = driverRepository.findById(driverId)
                                 .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Driver not found"));
 
-                // 5. Verify driver is still AVAILABLE
+                // 4. Verify driver is still AVAILABLE
                 if (driver.getStatus() != DriverStatus.AVAILABLE) {
                         throw new ResourceNotFoundException(
                                         "Driver is no longer available");
                 }
 
-                // 6. Accept reservation
+                // 5. Accept reservation
                 reservation.setStatus(ReservationStatus.ACCEPTED);
                 reservation.setUpdatedAt(now);
 
-                // 7. Move driver to ON_TRIP
+                // 6. Move driver to ON_TRIP
                 driver.setStatus(DriverStatus.ON_TRIP);
                 driver.setUpdatedAt(now);
 
-                // 8. Persist both in the same transaction
+                // 7. Persist both in the same transaction
                 reservationRepository.save(reservation);
                 driverRepository.save(driver);
 
@@ -184,10 +178,6 @@ public class DriverReservationServiceImpl implements DriverReservationService {
                 if (!reservation.getDriverId().equals(driverId)) {
                         throw new ResourceNotFoundException(
                                         "Driver does not own this reservation");
-                }
-
-                if (reservation.getStatus() != ReservationStatus.ACTIVE) {
-                        return;
                 }
 
                 Instant now = Instant.now();
