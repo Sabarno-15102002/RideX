@@ -4,9 +4,10 @@ import java.time.Instant;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import com.ridex.payment.dto.response.ErrorResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -155,4 +156,48 @@ public class GlobalExceptionHandler {
                                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                                 .body(errorResponse);
         }
+
+        @ExceptionHandler(MethodArgumentNotValidException.class)
+        public ResponseEntity<ErrorResponse> handleValidationException(
+                        MethodArgumentNotValidException ex,
+                        HttpServletRequest request) {
+
+                String message = ex.getBindingResult()
+                                .getFieldErrors()
+                                .stream()
+                                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                                .findFirst()
+                                .orElse("Request validation failed");
+
+                ErrorResponse response = new ErrorResponse(
+                                Instant.now(),
+                                HttpStatus.BAD_REQUEST.value(),
+                                "VALIDATION_ERROR",
+                                message,
+                                request.getRequestURI(),
+                                request.getHeader("X-Correlation-Id"));
+
+                return ResponseEntity
+                                .status(HttpStatus.BAD_REQUEST)
+                                .body(response);
+        }
+
+        @ExceptionHandler(HttpMessageNotReadableException.class)
+        public ResponseEntity<ErrorResponse> handleUnreadableRequest(
+                        HttpMessageNotReadableException ex,
+                        HttpServletRequest request) {
+
+                ErrorResponse response = new ErrorResponse(
+                                Instant.now(),
+                                HttpStatus.BAD_REQUEST.value(),
+                                "INVALID_REQUEST_BODY",
+                                "Request body is missing, malformed, or contains invalid values",
+                                request.getRequestURI(),
+                                request.getHeader("X-Correlation-Id"));
+
+                return ResponseEntity
+                                .status(HttpStatus.BAD_REQUEST)
+                                .body(response);
+        }
+
 }

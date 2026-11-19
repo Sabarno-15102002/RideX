@@ -22,23 +22,22 @@ import lombok.extern.slf4j.Slf4j;
 public class PricingServiceClient {
 
     private final LoadBalancerClient loadBalancerClient;
-        private final RestClient restClient;
+    private final RestClient restClient;
 
-        public PricingServiceClient(
-                LoadBalancerClient loadBalancerClient,
-                RestClient.Builder restClientBuilder) {
+    public PricingServiceClient(
+            LoadBalancerClient loadBalancerClient,
+            RestClient.Builder restClientBuilder) {
 
-                this.loadBalancerClient = loadBalancerClient;
+        this.loadBalancerClient = loadBalancerClient;
 
-                JdkClientHttpRequestFactory requestFactory =
-                        new JdkClientHttpRequestFactory();
+        JdkClientHttpRequestFactory requestFactory = new JdkClientHttpRequestFactory();
 
-                requestFactory.setReadTimeout(Duration.ofSeconds(2));
+        requestFactory.setReadTimeout(Duration.ofSeconds(2));
 
-                this.restClient = restClientBuilder
-                        .requestFactory(requestFactory)
-                        .build();
-        }
+        this.restClient = restClientBuilder
+                .requestFactory(requestFactory)
+                .build();
+    }
 
     @Retryable(retryFor = RestClientException.class, maxAttempts = 2, backoff = @Backoff(delay = 100))
     public FareQuoteResponse getFareQuote(UUID tripId) {
@@ -46,29 +45,25 @@ public class PricingServiceClient {
         ServiceInstance instance = loadBalancerClient.choose("pricing-service");
 
         if (instance == null) {
-                throw new IllegalStateException(
-                                "No available pricing-service instance");
+            throw new IllegalStateException(
+                    "No available pricing-service instance");
         }
 
-        FareQuoteResponse response = null;
-
-        try{
-            response = restClient.get()
-                            .uri(uriBuilder -> uriBuilder
-                                                .scheme(instance.getUri().getScheme())
-                                                .host(instance.getHost())
-                                                .port(instance.getPort())
-                                                .path("/api/v1/internal/pricing/trips/{tripId}")
-                                                .build(tripId))
-                                        .retrieve()
-                                        .body(
-                                            new ParameterizedTypeReference<>() {
-                                        });
-        }
-        catch (RestClientException e) {
+        try {
+            return restClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .scheme(instance.getUri().getScheme())
+                            .host(instance.getHost())
+                            .port(instance.getPort())
+                            .path("/api/v1/internal/pricing/trips/{tripId}")
+                            .build(tripId))
+                    .retrieve()
+                    .body(new ParameterizedTypeReference<>() {
+                    });
+        } catch (RestClientException e) {
             log.error("Error while calling Pricing Service: {}", e.getMessage());
+            throw e;
         }
-
-        return response;
     }
+
 }
