@@ -1,0 +1,3 @@
+package com.ridex.location.event;
+import com.ridex.location.service.DriverLocationService; import org.junit.jupiter.api.Test; import java.time.Instant; import java.util.UUID; import static org.mockito.Mockito.*;
+class TripCompletedConsumerTest { @Test void delegatesEventUnchanged(){ DriverLocationService service=mock(DriverLocationService.class); TripCompletedConsumer consumer=new TripCompletedConsumer(service); TripCompletedEvent event=new TripCompletedEvent(UUID.randomUUID(),UUID.randomUUID(),UUID.randomUUID(),UUID.randomUUID(),1,2,3,4,Instant.now(),Instant.now()); consumer.consume(event); verify(service).handleTripCompleted(event); } }

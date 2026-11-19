@@ -49,7 +49,7 @@ public class KafkaConsumerConfig {
 
                 config.put(
                                 JsonDeserializer.TRUSTED_PACKAGES,
-                                "com.ridex.driver.event");
+                                "com.ridex.location.event");
 
                 config.put(
                                 ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG,
